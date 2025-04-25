@@ -1,0 +1,42 @@
+.transaction-list {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.transaction-list table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.transaction-list th {
+    text-align: left;
+    padding: 12px;
+    background-color: #f5f7fa;
+    color: #555;
+    font-weight: 500;
+}
+
+.transaction-list td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+.amount {
+    font-weight: 500;
+}
+
+.amount.positive {
+    color: #4CAF50;
+}
+
+.amount.negative {
+    color: #f44336;
+}
+
+@media (max-width: 768px) {
+    .transaction-list {
+        overflow-x: auto;
+    }
+}

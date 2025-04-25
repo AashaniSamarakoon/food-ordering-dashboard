@@ -1,0 +1,42 @@
+.dashboard-container {
+    padding: 30px;
+    margin-left: 250px;
+    margin-top: 70px;
+}
+
+.dashboard-title {
+    color: #333;
+    margin-bottom: 30px;
+    font-size: 28px;
+}
+
+.dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        margin-left: 70px;
+    }
+
+    .dashboard-title {
+        font-size: 24px;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-container {
+        margin-left: 0;
+        padding: 20px;
+    }
+
+    .dashboard-title {
+        font-size: 20px;
+    }
+
+    .dashboard-cards {
+        grid-template-columns: 1fr;
+    }
+}

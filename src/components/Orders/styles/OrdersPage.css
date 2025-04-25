@@ -1,0 +1,102 @@
+.orders-page {
+    padding: 20px;
+    margin-left: 250px;
+    margin-top: 70px;
+}
+
+.status-tabs {
+    display: flex;
+    margin: 20px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.tab {
+    padding: 10px 20px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    font-size: 16px;
+    color: #666;
+}
+
+.tab.active {
+    color: #4CAF50;
+    border-bottom-color: #4CAF50;
+    font-weight: 500;
+}
+
+.order-list {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.order-list th {
+    text-align: left;
+    padding: 12px;
+    background-color: #f5f7fa;
+    color: #555;
+    font-weight: 500;
+}
+
+.order-list td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+.order-row {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.order-row:hover {
+    background-color: #f9f9f9;
+}
+
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    color: white;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .orders-page {
+        margin-left: 70px;
+    }
+}
+/* Add to OrdersPage.css */
+.page-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.back-button {
+    background: none;
+    border: none;
+    color: #4CAF50;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.back-button:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+    .orders-page {
+        margin-left: 0;
+        padding: 10px;
+    }
+
+    .order-list {
+        display: block;
+        overflow-x: auto;
+    }
+}

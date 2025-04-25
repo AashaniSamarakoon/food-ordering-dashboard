@@ -1,0 +1,67 @@
+.account-card {
+    border-radius: 10px;
+    padding: 20px;
+    color: white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: 180px;
+}
+
+.account-card:hover {
+    transform: translateY(-5px);
+}
+
+.account-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.account-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.account-type {
+    background: rgba(255,255,255,0.2);
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+}
+
+.account-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.account-number {
+    font-family: monospace;
+    font-size: 1.1rem;
+    margin: 5px 0;
+}
+
+.account-balance {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 10px 0 0 0;
+}
+
+.account-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.view-btn {
+    background: rgba(255,255,255,0.3);
+    border: none;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}

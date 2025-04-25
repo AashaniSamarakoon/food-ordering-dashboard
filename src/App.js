@@ -40,16 +40,8 @@ function App() {
                 <Route path="/register" element={<Register />} />
                 <Route path="/login" element={<Login />} />
 
-                {/* Dashboard Routes - No protection */}
-                <Route path="/dashboard" element={<DashboardLayout />}>
-                    <Route index element={<Dashboard />} />
-                    <Route path="menu" element={<MenuList />} />
-                    <Route path="menu/add" element={<AddMenuItem />} />
-                    <Route path="orders" element={<OrdersPage />} />
-                    <Route path="orders/:orderId" element={<OrderDetails />} />
-                    <Route path="banking" element={<BankingPage />} />
-                    <Route path="about" element={<AboutPage />} />
-                </Route>
+                {/* Dashboard Routes */}
+                <Route path="/dashboard/*" element={<DashboardLayout />} />
 
                 {/* Redirect to onboarding for unknown routes */}
                 <Route path="*" element={<Navigate to="/" replace />} />
