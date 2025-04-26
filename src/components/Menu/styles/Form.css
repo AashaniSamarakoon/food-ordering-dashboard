@@ -6,7 +6,7 @@
 
 .form-row {
     display: flex;
-    gap: 20px;
+    gap: 8px;
 }
 
 .form-group {
@@ -32,18 +32,18 @@
 
 .form-group textarea {
     resize: vertical;
-    min-height: 80px;
+    min-height: 50px;
 }
 
 .image-upload-container {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
 }
 
 .image-preview {
     width: 150px;
-    height: 150px;
+    height: 120px;
     object-fit: cover;
     border-radius: 8px;
     border: 1px solid #eee;

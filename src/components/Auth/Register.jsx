@@ -122,24 +122,22 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { registerRestaurant } from './authSlice';
 import './styles/auth.css';
 
 const Register = () => {
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({
-        // Step 1
         restaurantName: '',
         email: '',
         password: '',
         confirmPassword: '',
-        // Step 2
         ownerName: '',
         nic: '',
         phone: '',
-        // Step 3
         address: '',
         location: null,
-        // Step 4
         bankAccountOwner: '',
         bankName: '',
         branchName: '',
@@ -148,6 +146,7 @@ const Register = () => {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     // HERE Maps Refs
     const mapContainer = useRef(null);
@@ -159,39 +158,28 @@ const Register = () => {
     // Initialize HERE Maps
     useEffect(() => {
         if (step === 3 && mapContainer.current && !map.current) {
-            // Initialize the platform object
             platform.current = new window.H.service.Platform({
                 apikey: 'auwF8x-OOfmvjZx2PbAzzNeN4mnaMfNXiYDmouemjpI'
             });
 
-            // Get default map types
             const defaultLayers = platform.current.createDefaultLayers();
 
-            // Initialize the map
             map.current = new window.H.Map(
                 mapContainer.current,
                 defaultLayers.vector.normal.map,
                 {
-                    center: { lat: 6.9271, lng: 79.8612 }, // Colombo coordinates
+                    center: { lat: 6.9271, lng: 79.8612 },
                     zoom: 12,
                     pixelRatio: window.devicePixelRatio || 1
                 }
             );
 
-            // Add behavior controls
             new window.H.mapevents.Behavior(new window.H.mapevents.MapEvents(map.current));
-
-            // Add UI controls
             window.H.ui.UI.createDefault(map.current, defaultLayers);
-
-            // Initialize geocoding service
             geocoder.current = platform.current.getSearchService();
-
-            // Add marker
             marker.current = new window.H.map.Marker({ lat: 6.9271, lng: 79.8612 });
             map.current.addObject(marker.current);
 
-            // Cleanup on unmount
             return () => {
                 if (map.current) {
                     map.current.dispose();
@@ -200,25 +188,22 @@ const Register = () => {
         }
     }, [step]);
 
-    // Handle address search
     const handleAddressSearch = () => {
         if (!formData.address || !geocoder.current) return;
 
         geocoder.current.geocode(
-            { q: formData.address, in: 'countryCode:LKA' }, // Limit to Sri Lanka
+            { q: formData.address, in: 'countryCode:LKA' },
             (result) => {
                 if (result.items.length > 0) {
                     const location = result.items[0].position;
                     const address = result.items[0].address.label;
 
-                    // Update form data
                     setFormData(prev => ({
                         ...prev,
                         address,
                         location: { lat: location.lat, lng: location.lng }
                     }));
 
-                    // Update map center and marker
                     map.current.setCenter(location);
                     marker.current.setGeometry(location);
                 }
@@ -230,11 +215,18 @@ const Register = () => {
         );
     };
 
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({
+            ...formData,
+            [name]: value
+        });
+    };
+
     const handleNext = (e) => {
         e.preventDefault();
         setError('');
 
-        // Validation based on current step
         if (step === 1) {
             if (!formData.restaurantName || !formData.email || !formData.password || !formData.confirmPassword) {
                 setError("All fields are required");
@@ -272,15 +264,17 @@ const Register = () => {
         setIsLoading(true);
 
         try {
-            // Here you would typically send the data to your backend
-            console.log('Registration data:', formData);
-
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1500));
-
+            const registrationData = {
+                ...formData,
+                latitude: formData.location?.lat,
+                longitude: formData.location?.lng
+            };
+            
+            await dispatch(registerRestaurant(registrationData)).unwrap();
+            
             navigate('/login', {
                 state: {
-                    success: 'Registration successful! Please log in.'
+                    success: 'Registration successful! Please wait for verification.'
                 }
             });
         } catch (error) {
@@ -289,15 +283,6 @@ const Register = () => {
             setIsLoading(false);
         }
     };
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({
-            ...formData,
-            [name]: value
-        });
-    };
-
     return (
         <div className="onboarding-container">
             <div className="auth-form">

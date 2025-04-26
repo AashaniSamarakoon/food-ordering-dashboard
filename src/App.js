@@ -8,6 +8,7 @@ import OrdersPage from "./components/Orders/OrdersPage";
 import OrderDetails from "./components/Orders/OrderDetails";
 import BankingPage from "./components/Banking/BankingPage";
 import AboutPage from "./components/About/AboutPage";
+import ProfilePage from "./components/Profile/ProfilePage";
 import Onboarding from './components/Auth/Onboarding';
 import Register from './components/Auth/Register';
 import Login from './components/Auth/Login';
@@ -26,6 +27,7 @@ function DashboardLayout() {
                 <Route path="orders/:orderId" element={<OrderDetails />} />
                 <Route path="banking" element={<BankingPage />} />
                 <Route path="about" element={<AboutPage />} />
+                <Route path="profile" element={<ProfilePage />} />
             </Routes>
         </div>
     );

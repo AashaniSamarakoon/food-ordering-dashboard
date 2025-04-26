@@ -13,6 +13,29 @@
     z-index: 1000;
 }
 
+/* Add these to your existing TopNav.css */
+
+.nav-profile-image {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #c1914d;
+}
+
+.profile-icon-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #c1914d;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 18px;
+}
+
 .search-bar {
     position: relative;
     width: 40%;
