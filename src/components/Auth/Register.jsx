@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { registerRestaurant } from './authSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { registerRestaurant, clearRegistrationStatus } from './authSlice';
 import './styles/auth.css';
 
 const Register = () => {
@@ -13,7 +13,6 @@ const Register = () => {
         confirmPassword: '',
         ownerName: '',
         nic: '',
-        role:'',
         phone: '',
         address: '',
         location: null,
@@ -23,9 +22,28 @@ const Register = () => {
         accountNumber: ''
     });
     const [error, setError] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    
+    const { isLoading, registrationStatus } = useSelector(
+        (state) => state.auth
+    );
+
+    useEffect(() => {
+        return () => {
+            dispatch(clearRegistrationStatus());
+        };
+    }, [dispatch]);
+
+    useEffect(() => {
+        if (registrationStatus === 'succeeded') {
+            navigate('/login', {
+                state: {
+                    success: 'Registration successful! Please wait for verification.'
+                }
+            });
+        }
+    }, [registrationStatus, navigate]);
 
     // HERE Maps Refs
     const mapContainer = useRef(null);
@@ -38,11 +56,10 @@ const Register = () => {
     useEffect(() => {
         if (step === 3 && mapContainer.current && !map.current) {
             platform.current = new window.H.service.Platform({
-                apikey: 'auwF8x-OOfmvjZx2PbAzzNeN4mnaMfNXiYDmouemjpI'
+                apikey: process.env.REACT_APP_HERE_MAPS_API_KEY || 'auwF8x-OOfmvjZx2PbAzzNeN4mnaMfNXiYDmouemjpI'
             });
 
             const defaultLayers = platform.current.createDefaultLayers();
-
             map.current = new window.H.Map(
                 mapContainer.current,
                 defaultLayers.vector.normal.map,
@@ -107,24 +124,33 @@ const Register = () => {
         setError('');
 
         if (step === 1) {
-            if (!formData.restaurantName || !formData.email || !formData.password || !formData.confirmPassword) {
-                setError("All fields are required");
+            const errors = [];
+            if (!formData.restaurantName) errors.push("Restaurant name is required");
+            if (!formData.email) errors.push("Email is required");
+            if (!formData.password) errors.push("Password is required");
+            if (formData.password.length < 8) errors.push("Password must be at least 8 characters");
+            if (formData.password !== formData.confirmPassword) errors.push("Passwords don't match");
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) errors.push("Invalid email format");
+            
+            if (errors.length > 0) {
+                setError(errors.join(', '));
                 return;
             }
-            if (formData.password !== formData.confirmPassword) {
-                setError("Passwords don't match!");
+        } 
+        else if (step === 2) {
+            const errors = [];
+            if (!formData.ownerName) errors.push("Owner name is required");
+            if (!formData.nic) errors.push("NIC is required");
+            if (!formData.phone) errors.push("Phone is required");
+            if (!/^[0-9]{9}[vVxX]$/.test(formData.nic)) errors.push("NIC must be 9 digits followed by v, V, x, or X");
+            if (!/^[0-9]{10}$/.test(formData.phone)) errors.push("Phone must be 10 digits");
+            
+            if (errors.length > 0) {
+                setError(errors.join(', '));
                 return;
             }
-            if (formData.password.length < 6) {
-                setError("Password must be at least 6 characters");
-                return;
-            }
-        } else if (step === 2) {
-            if (!formData.ownerName || !formData.nic || !formData.phone) {
-                setError("All fields are required");
-                return;
-            }
-        } else if (step === 3) {
+        } 
+        else if (step === 3) {
             if (!formData.address || !formData.location) {
                 setError("Please select a valid address from the map");
                 return;
@@ -140,26 +166,49 @@ const Register = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setIsLoading(true);
-
+        setError('');
+        
         try {
             const registrationData = {
-                ...formData,
+                email: formData.email,
+                password: formData.password,
+                restaurantName: formData.restaurantName,
+                ownerName: formData.ownerName,
+                nic: formData.nic,
+                phone: formData.phone,
+                address: formData.address,
                 latitude: formData.location?.lat,
-                longitude: formData.location?.lng
+                longitude: formData.location?.lng,
+                bankAccountOwner: formData.bankAccountOwner,
+                bankName: formData.bankName,
+                branchName: formData.branchName,
+                accountNumber: formData.accountNumber
             };
+    
+            console.log('Sending registration data:', registrationData);
             
-            await dispatch(registerRestaurant(registrationData)).unwrap();
+            const result = await dispatch(registerRestaurant(registrationData));
             
-            navigate('/login', {
-                state: {
-                    success: 'Registration successful! Please wait for verification.'
+            if (registerRestaurant.rejected.match(result)) {
+                const backendError = result.payload;
+                console.error('Backend error:', backendError);
+                
+                // Handle specific error cases
+                if (backendError?.status === 500) {
+                    setError('Server error. Please try again later or contact support.');
+                } else if (backendError?.status === 403) {
+                    setError('This email is already registered. Please use a different email.');
+                } else if (backendError?.errors) {
+                    const errorMessages = Object.entries(backendError.errors)
+                        .map(([field, errors]) => `${field}: ${errors.join(', ')}`);
+                    setError(errorMessages.join('\n'));
+                } else {
+                    setError(backendError?.message || 'Registration failed. Please try again.');
                 }
-            });
-        } catch (error) {
-            setError(error.message || 'Registration failed. Please try again.');
-        } finally {
-            setIsLoading(false);
+            }
+        } catch (err) {
+            console.error('Unexpected error:', err);
+            setError('An unexpected error occurred. Please try again.');
         }
     };
 
@@ -167,9 +216,25 @@ const Register = () => {
         <div className="onboarding-container">
             <div className="auth-form">
                 <h2>Register Your Restaurant</h2>
-                {error && <div className="error-message">{error}</div>}
+                {error && (
+                    <div className={`error-message ${error.includes('Server error') ? 'server-error' : ''}`}>
+                        {error.split('\n').map((err, i) => (
+                            <div key={i}>
+                                {err.includes('Server error') ? (
+                                    <>
+                                        ⚠️ <strong>{err}</strong>
+                                        <div className="error-help">
+                                            Our technical team has been notified. Please try again later.
+                                        </div>
+                                    </>
+                                ) : (
+                                    `• ${err.trim()}`
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                )}
 
-                {/* Progress indicator */}
                 <div className="progress-steps">
                     <div className={`step ${step >= 1 ? 'active' : ''}`}>1</div>
                     <div className={`step ${step >= 2 ? 'active' : ''}`}>2</div>
@@ -199,6 +264,7 @@ const Register = () => {
                                 value={formData.email}
                                 onChange={handleChange}
                                 required
+                                pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
                             />
                         </div>
 
@@ -206,11 +272,11 @@ const Register = () => {
                             <input
                                 type="password"
                                 name="password"
-                                placeholder="Password (min 6 characters)"
+                                placeholder="Password (min 8 characters)"
                                 value={formData.password}
                                 onChange={handleChange}
                                 required
-                                minLength={6}
+                                minLength={8}
                             />
                         </div>
 
@@ -229,6 +295,7 @@ const Register = () => {
                             <button
                                 type="submit"
                                 className="submit-btn primary"
+                                disabled={isLoading}
                             >
                                 Save & Next
                             </button>
@@ -254,20 +321,11 @@ const Register = () => {
                             <input
                                 type="text"
                                 name="nic"
-                                placeholder="NIC Number"
+                                placeholder="NIC (e.g., 123456789V)"
                                 value={formData.nic}
                                 onChange={handleChange}
                                 required
-                            />
-                        </div>
-                        <div className="form-group">
-                            <input
-                                type="text"
-                                name="role"
-                                placeholder="User Role"
-                                value={formData.role}
-                                onChange={handleChange}
-                                required
+                                pattern="^[0-9]{9}[vVxX]$"
                             />
                         </div>
 
@@ -275,10 +333,11 @@ const Register = () => {
                             <input
                                 type="tel"
                                 name="phone"
-                                placeholder="Phone Number"
+                                placeholder="Phone (10 digits)"
                                 value={formData.phone}
                                 onChange={handleChange}
                                 required
+                                pattern="^[0-9]{10}$"
                             />
                         </div>
 
@@ -293,6 +352,7 @@ const Register = () => {
                             <button
                                 type="submit"
                                 className="submit-btn primary"
+                                disabled={isLoading}
                             >
                                 Save & Next
                             </button>
@@ -323,7 +383,6 @@ const Register = () => {
                             </div>
                         </div>
 
-                        {/* HERE Map Container */}
                         <div ref={mapContainer} className="map-container" />
 
                         {formData.location && (
@@ -343,6 +402,7 @@ const Register = () => {
                             <button
                                 type="submit"
                                 className="submit-btn primary"
+                                disabled={isLoading}
                             >
                                 Save & Next
                             </button>

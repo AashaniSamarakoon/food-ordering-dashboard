@@ -5,7 +5,7 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     text-align: center;
     transition: transform 0.3s ease;
-    margin: 10px;
+    margin: 5px;
     flex: 1;
     min-width: 200px;
 }
@@ -15,7 +15,7 @@
 }
 
 .highlighted {
-    background-color: #c1914d;
+    background-color: black;
     color: white;
 }
 
@@ -33,7 +33,7 @@
 
 .card-icon {
     margin-bottom: 15px;
-    color: #c1914d;
+    color: #e28445;
 }
 
 .highlighted .card-icon,

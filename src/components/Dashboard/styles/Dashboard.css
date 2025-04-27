@@ -2,12 +2,24 @@
     padding: 30px;
     margin-left: 250px;
     margin-top: 70px;
+    background: 
+    linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)),
+    url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') no-repeat center center fixed;
+background-size: cover;
 }
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 10px;
+    height: calc(100% - 150px); /* Adjust based on your card height */
+  }
 
 .dashboard-title {
     color: #333;
-    margin-bottom: 30px;
-    font-size: 28px;
+    margin-bottom: 23px;
+    font-size: 24px;
 }
 
 .dashboard-cards {
@@ -18,7 +30,7 @@
 
 @media (max-width: 768px) {
     .dashboard-container {
-        margin-left: 70px;
+        margin-left: 50px;
     }
 
     .dashboard-title {
@@ -40,3 +52,37 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* Add these to your existing Dashboard.css */
+/* .charts-container {
+    margin-top: 30px;
+    background-color: rgb(232, 231, 229);
+    border-radius: 12px;
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  } */
+  
+  .chart-card {
+    background-color: rgb(235, 234, 231);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+  
+  /* .chart-card h3 {
+    color: #333;
+    margin-bottom: 15px;
+    font-size: 18px;
+  } */
+  
+  .chart-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  
+  @media (max-width: 768px) {
+    .chart-row {
+      grid-template-columns: 1fr;
+    }
+  }

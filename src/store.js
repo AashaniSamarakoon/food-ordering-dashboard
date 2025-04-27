@@ -1,20 +1,12 @@
-import { configureStore, createSlice } from '@reduxjs/toolkit';
+import { configureStore } from '@reduxjs/toolkit';
+import authReducer from './authSlice';
 
-const authSlice = createSlice({
-    name: 'auth',
-    initialState: { isAuthenticated: false },
-    reducers: {
-        login: (state) => { state.isAuthenticated = true },
-        logout: (state) => { state.isAuthenticated = false },
-        registerRestaurant: (state, action) => {
-            // Handle registration logic here
-        }
-    },
-});
-
-export const { login, logout, registerRestaurant } = authSlice.actions;
-export default configureStore({
-    reducer: {
-        auth: authSlice.reducer,
-    },
+export const store = configureStore({
+  reducer: {
+    auth: authReducer,
+  },
+  middleware: (getDefaultMiddleware) => 
+    getDefaultMiddleware({
+      serializableCheck: false, // If you're passing non-serializable values
+    }),
 });
