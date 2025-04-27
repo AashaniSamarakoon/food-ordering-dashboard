@@ -1,125 +1,3 @@
-// import { useState } from 'react';
-// import { useNavigate } from 'react-router-dom';
-// // import { useDispatch } from 'react-redux';
-// // import { registerRestaurant } from './authSlice';
-// import './styles/auth.css';
-//
-// const Register = () => {
-//     const [formData, setFormData] = useState({
-//         restaurantName: '',
-//         email: '',
-//         password: '',
-//         confirmPassword: ''
-//     });
-//     const [error, setError] = useState('');
-//     const [isLoading, setIsLoading] = useState(false);
-//
-//     const navigate = useNavigate();
-//     // const dispatch = useDispatch();
-//
-//     const handleSubmit = async (e) => {
-//         e.preventDefault();
-//         setError('');
-//
-//         // Validation
-//         if (formData.password !== formData.confirmPassword) {
-//             setError("Passwords don't match!");
-//             return;
-//         }
-//         if (formData.password.length < 6) {
-//             setError("Password must be at least 6 characters");
-//             return;
-//         }
-//
-//         setIsLoading(true);
-//
-//         try {
-//             // await dispatch(registerRestaurant(formData)).unwrap();
-//             navigate('/login', {
-//                 state: {
-//                     success: 'Registration successful! Please log in.'
-//                 }
-//             });
-//         } catch (error) {
-//             setError(error.message || 'Registration failed. Please try again.');
-//         } finally {
-//             setIsLoading(false);
-//         }
-//     };
-//
-//     return (
-//         <div className="onboarding-container">
-//             <div className="auth-form">
-//                 <h2>Register Your Restaurant</h2>
-//                 {error && <div className="error-message">{error}</div>}
-//
-//                 <form onSubmit={handleSubmit}>
-//                     <div className="form-group">
-//                         <input
-//                             type="text"
-//                             placeholder="Restaurant Name"
-//                             value={formData.restaurantName}
-//                             onChange={(e) => setFormData({...formData, restaurantName: e.target.value})}
-//                             required
-//                         />
-//                     </div>
-//
-//                     <div className="form-group">
-//                         <input
-//                             type="email"
-//                             placeholder="Email"
-//                             value={formData.email}
-//                             onChange={(e) => setFormData({...formData, email: e.target.value})}
-//                             required
-//                         />
-//                     </div>
-//
-//                     <div className="form-group">
-//                         <input
-//                             type="password"
-//                             placeholder="Password (min 6 characters)"
-//                             value={formData.password}
-//                             onChange={(e) => setFormData({...formData, password: e.target.value})}
-//                             required
-//                             minLength={6}
-//                         />
-//                     </div>
-//
-//                     <div className="form-group">
-//                         <input
-//                             type="password"
-//                             placeholder="Confirm Password"
-//                             value={formData.confirmPassword}
-//                             onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
-//                             required
-//                         />
-//                     </div>
-//
-//                     <button
-//                         type="submit"
-//                         className="submit-btn"
-//                         disabled={isLoading}
-//                     >
-//                         {isLoading ? 'Registering...' : 'Register'}
-//                     </button>
-//                 </form>
-//
-//                 <p className="auth-footer">
-//                     Already have an account?
-//                     <span
-//                         className="auth-link"
-//                         onClick={() => navigate('/login')}
-//                     >
-//                         Login
-//                     </span>
-//                 </p>
-//             </div>
-//         </div>
-//     );
-// };
-//
-// export default Register;
-
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
@@ -135,6 +13,7 @@ const Register = () => {
         confirmPassword: '',
         ownerName: '',
         nic: '',
+        role:'',
         phone: '',
         address: '',
         location: null,
@@ -283,6 +162,7 @@ const Register = () => {
             setIsLoading(false);
         }
     };
+
     return (
         <div className="onboarding-container">
             <div className="auth-form">
@@ -376,6 +256,16 @@ const Register = () => {
                                 name="nic"
                                 placeholder="NIC Number"
                                 value={formData.nic}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+                        <div className="form-group">
+                            <input
+                                type="text"
+                                name="role"
+                                placeholder="User Role"
+                                value={formData.role}
                                 onChange={handleChange}
                                 required
                             />

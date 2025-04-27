@@ -6,15 +6,15 @@ const authSlice = createSlice({
     reducers: {
         login: (state) => { state.isAuthenticated = true },
         logout: (state) => { state.isAuthenticated = false },
+        registerRestaurant: (state, action) => {
+            // Handle registration logic here
+        }
     },
 });
 
-export const { login, logout } = authSlice.actions;
-
-const store = configureStore({
+export const { login, logout, registerRestaurant } = authSlice.actions;
+export default configureStore({
     reducer: {
         auth: authSlice.reducer,
     },
 });
-
-export default store;

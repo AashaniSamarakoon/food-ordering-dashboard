@@ -208,50 +208,23 @@ export const login = createAsyncThunk(
     }
 );
 
+// authSlice.js
 const authSlice = createSlice({
     name: 'auth',
-    initialState: {
-        user: null,
-        token: localStorage.getItem('token') || null,
-        isAuthenticated: !!localStorage.getItem('token'),
-        isLoading: false,
-        error: null
-    },
-    reducers: {
-        logout: (state) => {
-            localStorage.removeItem('token');
-            state.user = null;
-            state.token = null;
-            state.isAuthenticated = false;
-        }
-    },
+    initialState: { isAuthenticated: false, status: 'idle', error: null },
+    reducers: {},
     extraReducers: (builder) => {
         builder
             .addCase(registerRestaurant.pending, (state) => {
-                state.isLoading = true;
-                state.error = null;
+                state.status = 'loading';
             })
-            .addCase(registerRestaurant.fulfilled, (state, action) => {
-                state.isLoading = false;
-                // Don't authenticate on registration - wait for verification
+            .addCase(registerRestaurant.fulfilled, (state) => {
+                state.status = 'succeeded';
+                state.isAuthenticated = true;
             })
             .addCase(registerRestaurant.rejected, (state, action) => {
-                state.isLoading = false;
-                state.error = action.payload;
-            })
-            .addCase(login.pending, (state) => {
-                state.isLoading = true;
-                state.error = null;
-            })
-            .addCase(login.fulfilled, (state, action) => {
-                state.isLoading = false;
-                state.isAuthenticated = true;
-                state.user = action.payload.user;
-                state.token = action.payload.token;
-            })
-            .addCase(login.rejected, (state, action) => {
-                state.isLoading = false;
-                state.error = action.payload;
+                state.status = 'failed';
+                state.error = action.error.message;
             });
     }
 });
