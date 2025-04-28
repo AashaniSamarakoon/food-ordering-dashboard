@@ -1,10 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit';
-import authReducer from './authSlice';
+import authReducer from './components/Auth/authSlice';
 
-export const store = configureStore({
-  reducer: {
-    auth: authReducer,
-  },
+export default configureStore({
+    reducer: {
+      auth: authReducer,
+    },
   middleware: (getDefaultMiddleware) => 
     getDefaultMiddleware({
       serializableCheck: false, // If you're passing non-serializable values

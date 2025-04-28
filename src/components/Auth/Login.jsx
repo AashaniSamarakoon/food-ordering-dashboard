@@ -192,13 +192,16 @@ const Login = () => {
         setIsLoading(true);
 
         try {
-            await dispatch(login(credentials)).unwrap();
+            const result = await dispatch(login(credentials));
             
-            const from = location.state?.from?.pathname || '/dashboard';
-            navigate(from, { replace: true });
-
-        } catch (error) {
-            setError(error.message || 'Login failed. Please try again.');
+            if (login.fulfilled.match(result)) {
+                const from = location.state?.from?.pathname || '/dashboard';
+                navigate(from, { replace: true });
+            } else if (login.rejected.match(result)) {
+                setError(result.payload?.message || 'Login failed. Please try again.');
+            }
+        } catch (err) {
+            setError('An unexpected error occurred');
         } finally {
             setIsLoading(false);
         }

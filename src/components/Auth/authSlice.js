@@ -117,30 +117,42 @@ export const registerRestaurant = createAsyncThunk(
     'auth/registerRestaurant',
     async (registrationData, { rejectWithValue }) => {
         try {
-            const response = await api.post('/auth/register', registrationData);
+            const response = await api.post('/api/auth/register', registrationData);
             return response.data;
         } catch (err) {
-            // Return the complete error response from backend
-            return rejectWithValue(err.response?.data || {
-                message: err.message || 'Registration failed'
+            // Handle string error responses
+            if (typeof err.response?.data === 'string') {
+                return rejectWithValue({ 
+                    message: err.response.data || 'Registration failed',
+                    status: err.response.status
+                });
+            }
+            // Handle JSON error responses
+            return rejectWithValue(err.response?.data || { 
+                message: err.message || 'Registration failed',
+                status: err.response?.status
             });
         }
     }
 );
 
+
 // Login action
+
 export const login = createAsyncThunk(
-    'auth/login',
+    'auth/authenticate',
     async (credentials, { rejectWithValue }) => {
-        try {
-            const response = await api.post('auth/authenticate', credentials);
-            localStorage.setItem('token', response.data.token);
-            return response.data;
-        } catch (err) {
-            return rejectWithValue(err.response?.data?.message || 'Login failed');
-        }
+      try {
+        const response = await api.post('api/auth/authenticate', credentials); // Note POST method
+        localStorage.setItem('token', response.data.token);
+        return response.data;
+      } catch (err) {
+        return rejectWithValue(err.response?.data || { 
+          message: err.message || 'Login failed' 
+        });
+      }
     }
-);
+  );
 
 // Add this to your authSlice.js
 export const checkEmailAvailability = createAsyncThunk(
