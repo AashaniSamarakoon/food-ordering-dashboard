@@ -4,12 +4,41 @@ import Charts from './Charts';
 import OrderHistory from './OrderHistory';
 import './styles/Dashboard.css';
 
+// Import your food images
+import burgerImg from './images/burger.jpg';
+import pizzaImg from './images/pizza.jpg';
+import pastaImg from './images/pasta.jpg';
+import sushiImg from './images/sushi.jpg';
+
 const Dashboard = () => {
+    const foodItems = [
+        { img: burgerImg, name: 'Burger', color: '#E28445' },
+        { img: pizzaImg, name: 'Pizza', color: '#F44336' },
+        { img: pastaImg, name: 'Pasta', color: '#4CAF50' },
+        { img: sushiImg, name: 'Sushi', color: '#2196F3' }
+    ];
+
     return (
         <div className="dashboard-container">
-            <h1 className="dashboard-title">FoodDash Overview</h1>
+            {/* <h1 className="dashboard-title">FoodDash Overview</h1> */}
             
-            {/* Stats Cards Section */}
+            {/* Square Food Images Container */}
+            <div className="square-food-container">
+                {foodItems.map((item, index) => (
+                    <div key={index} className="square-food-item" style={{ borderColor: item.color }}>
+                        <img 
+                            src={item.img} 
+                            alt={item.name} 
+                            className="square-food-image"
+                        />
+                        <span className="square-food-label">{item.name}</span>
+                    </div>
+                ))}
+            </div>
+
+            <h1 className="dashboard-title">FoodDash Overview</h1>
+
+            {/* Rest of your existing components remain unchanged */}
             <div className="dashboard-cards">
                 <DashboardCard title="Completed Order" value="60,554" />
                 <DashboardCard title="Order Received" value="60,654" />
@@ -17,7 +46,6 @@ const Dashboard = () => {
                 <DashboardCard title="Net Earning" value="$10,075" isHighlighted />
             </div>
 
-            {/* Two Column Layout */}
             <div className="dashboard-content">
                 <div className="chart-column">
                     <Charts />

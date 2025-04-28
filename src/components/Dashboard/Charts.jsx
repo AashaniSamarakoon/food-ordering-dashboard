@@ -9,8 +9,8 @@ const Charts = () => {
         datasets: [{
             data: [48554, 10000, 2000],
             backgroundColor: [
-                '#4CAF50',
-                '#2196F3',
+                '#e7ac59',
+                '#38904b',
                 '#F44336'
             ],
             borderWidth: 0

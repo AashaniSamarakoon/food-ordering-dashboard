@@ -36,11 +36,11 @@ tr:hover {
 }
 
 .status-badge.delivered {
-    background-color: #4CAF50;
+    background-color: #e7ac59;
 }
 
 .status-badge.processing {
-    background-color: #2196F3;
+    background-color: #38904b;
 }
 
 .status-badge.cancelled {
