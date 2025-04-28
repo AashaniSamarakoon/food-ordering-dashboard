@@ -16,7 +16,7 @@
 }
 
 .highlighted {
-    background-color: #e28445;
+    background-color: #4f4b46;
     color: white;
 }
 
@@ -36,7 +36,7 @@
 
 .card-icon {
     font-size: 24px;
-    color: #e28445;
+    color: #e7ac59;
 }
 
 .highlighted .card-icon {

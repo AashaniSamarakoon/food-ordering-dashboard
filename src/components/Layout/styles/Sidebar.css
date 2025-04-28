@@ -1,14 +1,15 @@
 .sidebar {
     width: 250px;
     height: 100vh;
-    background-color: #818176;
-    color: white;
+    background-color: #616568;
+    color: rgb(191, 114, 13);
     position: fixed;
     left: 0;
     top: 0;
     display: flex;
     flex-direction: column;
     transition: all 0.3s;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .sidebar-logo {
@@ -17,60 +18,82 @@
     font-weight: bold;
     text-align: center;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-image {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
 }
 
 .sidebar-nav {
     flex: 1;
     padding: 20px 0;
+    overflow-y: auto;
 }
 
 .nav-item {
     display: flex;
     align-items: center;
-    padding: 25px 50px;
-    color: rgba(13, 13, 13, 0.7);
+    padding: 12px 20px;
+    color: rgba(14, 13, 13, 0.8);
     text-decoration: none;
     transition: all 0.3s;
+    margin: 5px 10px;
+    border-radius: 5px;
 }
 
-.nav-item:hover, .nav-item.active {
-    background-color: rgba(255, 255, 255, 0.1);
-    color:black;
+.nav-item:hover {
+    background-color: #1a1b1d;
+    color: white;
+}
+
+.nav-item.active {
+    background-color: #3498db;
+    color: white;
 }
 
 .nav-icon {
     margin-right: 10px;
     width: 20px;
     text-align: center;
+    font-size: 16px;
 }
 
 .sidebar-footer {
-    padding: 20px 0;
+    padding: 15px 0;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Add this to your existing Sidebar.css */
-.nav-item.active {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: white;
-}
-
-/* If you want to highlight based on route */
+/* Active route highlighting */
 .nav-item[aria-current="page"] {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: white;
+    background-color: #3498db;
+    color: rgb(42, 38, 38);
 }
 
+/* Mobile responsiveness */
 @media (max-width: 768px) {
     .sidebar {
         width: 70px;
     }
-    .sidebar-logo, .nav-item span {
+    .sidebar-logo span, .nav-item span {
         display: none;
+    }
+    .sidebar-logo {
+        padding: 15px 0;
+    }
+    .logo-image {
+        width: 40px;
+        height: 40px;
     }
     .nav-item {
         justify-content: center;
         padding: 15px 0;
+        margin: 5px 0;
     }
     .nav-icon {
         margin-right: 0;
