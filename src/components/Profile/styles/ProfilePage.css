@@ -94,14 +94,15 @@
   }
   
   .save-btn {
-    background-color: #4CAF50;
+    background-color: #dda23a;
     color: white;
     margin-right: 10px;
   }
   
   .cancel-btn {
-    background-color: #f44336;
+    background-color: #cbc69e;
     color: white;
+    margin-right: 10px;
   }
   
   .profile-main {

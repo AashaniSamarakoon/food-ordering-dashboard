@@ -2,54 +2,116 @@
     background-color: #ffffff;
     border-radius: 12px;
     padding: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    transition: transform 0.3s ease;
-    margin: 5px;
-    flex: 1;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 20px;
     min-width: 200px;
 }
 
 .dashboard-card:hover {
     transform: translateY(-5px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
 }
 
 .highlighted {
-    background-color: black;
+    background-color: #e28445;
     color: white;
+}
+
+.card-icon-container {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: rgba(226, 132, 69, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.highlighted .card-icon-container {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.card-icon {
+    font-size: 24px;
+    color: #e28445;
+}
+
+.highlighted .card-icon {
+    color: white;
+}
+
+.card-content {
+    flex: 1;
 }
 
 .card-title {
     font-size: 16px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     font-weight: 500;
+    color: #666;
+}
+
+.highlighted .card-title {
+    color: rgba(255, 255, 255, 0.9);
 }
 
 .card-value {
     font-size: 24px;
     font-weight: 700;
     margin: 0;
+    color: #333;
 }
 
-.card-icon {
-    margin-bottom: 15px;
-    color: #e28445;
-}
-
-.highlighted .card-icon,
-.highlighted .card-title,
 .highlighted .card-value {
+    color: white;
+}
+
+/* Rating specific styles */
+.rating-value {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.stars {
+    display: flex;
+    gap: 2px;
+}
+
+.star {
+    color: #ddd;
+    font-size: 16px;
+}
+
+.star.filled {
+    color: #FFC107;
+}
+
+.numeric-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+}
+
+.highlighted .numeric-value {
     color: white;
 }
 
 @media (max-width: 768px) {
     .dashboard-card {
-        min-width: calc(50% - 20px);
+        padding: 15px;
+        gap: 15px;
     }
-}
-
-@media (max-width: 480px) {
-    .dashboard-card {
-        min-width: 100%;
+    
+    .card-icon-container {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .card-value, .numeric-value {
+        font-size: 20px;
     }
 }
