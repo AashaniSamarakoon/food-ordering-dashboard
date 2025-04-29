@@ -38,7 +38,7 @@ const OrderList = ({ orders, onOrderClick }) => {
                     <td>{order.id}</td>
                     <td>{order.customer}</td>
                     <td>{order.items}</td>
-                    <td>${order.total.toFixed(2)}</td>
+                    <td>LKR {order.total.toFixed(2)}</td>
                     <td>
               <span
                   className="status-badge"

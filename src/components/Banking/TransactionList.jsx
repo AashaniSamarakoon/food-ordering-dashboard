@@ -20,7 +20,7 @@ const TransactionList = ({ transactions }) => {
                         <td>{transaction.description}</td>
                         <td className={`amount ${transaction.amount >= 0 ? 'positive' : 'negative'}`}>
                             {transaction.amount >= 0 ? '+' : ''}
-                            ${Math.abs(transaction.amount).toFixed(2)}
+                            LKR {Math.abs(transaction.amount).toFixed(2)}
                         </td>
                         <td>{transaction.account}</td>
                     </tr>

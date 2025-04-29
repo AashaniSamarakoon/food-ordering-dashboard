@@ -120,6 +120,8 @@ background-size: cover;
   justify-content: center;
 }
 
+
+
 @media (max-width: 1024px) {
   .dashboard-container {
       margin-left: 0;

@@ -25,14 +25,26 @@ const Charts = () => {
                     data={orderData} 
                     options={{ 
                         responsive: true,
+                        maintainAspectRatio: false,
                         plugins: {
-                            legend: { position: 'right' }
-                        }
+                            legend: { 
+                                position: 'right',
+                                labels: {
+                                    boxWidth: 15,
+                                    padding: 15
+                                }
+                            }
+                        },
+                        // These settings increase the visible radius
+                        circumference: 360,  // Full circle
+                        rotation: 0,         // Start at top
+                        radius: '90%',       // Use maximum available space
                     }} 
                 />
             </div>
         </div>
     );
 };
+
 
 export default Charts;

@@ -12,19 +12,19 @@ const OrdersPage = () => {
     const orders = {
         inProgress: [
             {
-                id: 'ORD-1001',
-                customer: 'John Doe',
+                id: 'ORD-1',
+                customer: 'Aashani',
                 items: 3,
-                total: 45.99,
-                status: 'preparing',
+                total: 4780.00,
+                status: 'onTheWay',
                 time: '10:30 AM',
                 deliveryType: 'pickup'
             },
             {
-                id: 'ORD-1002',
-                customer: 'Jane Smith',
+                id: 'ORD-2',
+                customer: 'Dulanjana',
                 items: 2,
-                total: 28.50,
+                total: 2300.00,
                 status: 'onTheWay',
                 time: '11:45 AM',
                 deliveryType: 'delivery',

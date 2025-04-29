@@ -19,7 +19,7 @@ const MenuItem = ({ item }) => {
                 <span>{item.name}</span>
             </td>
             <td>{item.category}</td>
-            <td>${item.price.toFixed(2)}</td>
+            <td>LKR {item.price.toFixed(2)}</td>
             <td>
         <span className={`status-badge ${item.status === 'Available' ? 'available' : 'out-of-stock'}`}>
           {item.status}

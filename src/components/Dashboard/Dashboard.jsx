@@ -36,14 +36,14 @@ const Dashboard = () => {
                 ))}
             </div>
 
-            <h1 className="dashboard-title">FoodDash Overview</h1>
+            <h1 className="dashboard-title">Savory Overview</h1>
 
             {/* Rest of your existing components remain unchanged */}
             <div className="dashboard-cards">
                 <DashboardCard title="Completed Order" value="60,554" />
                 <DashboardCard title="Order Received" value="60,654" />
                 <DashboardCard title="Ratings" value="4.5" />
-                <DashboardCard title="Net Earning" value="$10,075" isHighlighted />
+                <DashboardCard title="Net Earning" value="LKR 10,600.00" isHighlighted />
             </div>
 
             <div className="dashboard-content">

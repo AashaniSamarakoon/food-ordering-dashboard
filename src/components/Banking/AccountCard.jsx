@@ -14,7 +14,7 @@ const AccountCard = ({ account }) => {
             <div className="account-details">
                 <p className="account-number">{account.accountNumber}</p>
                 <p className="account-balance">
-                    ${account.balance.toLocaleString('en-US', {
+                    LKR {account.balance.toLocaleString('en-US', {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2
                 })}

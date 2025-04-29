@@ -8,7 +8,7 @@ const BankingPage = () => {
     const [accounts, setAccounts] = useState([
         {
             id: 1,
-            bankName: 'Chase Bank',
+            bankName: 'BOC',
             accountNumber: '****3456',
             accountType: 'Business Checking',
             balance: 12500.75,
@@ -16,7 +16,7 @@ const BankingPage = () => {
         },
         {
             id: 2,
-            bankName: 'Bank of America',
+            bankName: 'HND',
             accountNumber: '****7821',
             accountType: 'Savings',
             balance: 32500.25,
@@ -29,7 +29,7 @@ const BankingPage = () => {
             id: 1,
             date: '2023-06-15',
             description: 'From APP',
-            amount: -1250.50,
+            amount: 1250.50,
             account: 'Chase Bank'
         },
         {

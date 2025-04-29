@@ -1,8 +1,8 @@
 .sidebar {
     width: 250px;
     height: 100vh;
-    background-color: #616568;
-    color: rgb(191, 114, 13);
+    background-color: #2c2e2f;
+    color: rgb(247, 244, 241);
     position: fixed;
     left: 0;
     top: 0;
@@ -17,7 +17,7 @@
     font-size: 1.5rem;
     font-weight: bold;
     text-align: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(220, 208, 208, 0.1);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -40,7 +40,7 @@
     display: flex;
     align-items: center;
     padding: 12px 20px;
-    color: rgba(14, 13, 13, 0.8);
+    color: rgba(223, 222, 218, 0.8);
     text-decoration: none;
     transition: all 0.3s;
     margin: 5px 10px;
@@ -48,7 +48,7 @@
 }
 
 .nav-item:hover {
-    background-color: #1a1b1d;
+    background-color: #52514d;
     color: white;
 }
 

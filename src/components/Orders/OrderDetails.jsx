@@ -12,24 +12,24 @@ const OrderDetails = () => {
     // Sample order data - in real app this would come from API
     const order = {
         id: orderId,
-        customer: 'John Doe',
-        contact: '+1 (555) 123-4567',
+        customer: 'Aashani',
+        contact: '0712845670',
         items: [
-            { name: 'Margherita Pizza', quantity: 2, price: 12.99 },
-            { name: 'Garlic Bread', quantity: 1, price: 4.99 },
-            { name: 'Coke', quantity: 1, price: 2.99 }
+            { name: 'Margherita Pizza', quantity: 2, price: 4300.00 },
+            { name: 'Garlic Bread', quantity: 1, price: 600.00 },
+            { name: 'Coke', quantity: 1, price: 450.00 }
         ],
         subtotal: 33.96,
         tax: 2.71,
         deliveryFee: 3.99,
-        total: 40.66,
+        total: 9650.00,
         status: 'onTheWay',
         orderTime: '2023-06-15T10:30:00',
         pickupTime: '2023-06-15T10:45:00',
         deliveryType: 'delivery',
         deliveryAddress: '123 Main St, Anytown, USA',
         driver: {
-            name: 'Michael Johnson',
+            name: 'Ramesh Perera',
             contact: '+1 (555) 987-6543',
             vehicle: 'Toyota Camry (ABC-1234)'
         },
@@ -60,9 +60,9 @@ const OrderDetails = () => {
                     <h3>Customer Details</h3>
                     <p><strong>Name:</strong> {order.customer}</p>
                     <p><strong>Contact:</strong> {order.contact}</p>
-                    {order.deliveryType === 'delivery' && (
+                    {/* {order.deliveryType === 'delivery' && (
                         <p><strong>Delivery Address:</strong> {order.deliveryAddress}</p>
-                    )}
+                    )} */}
                 </div>
 
                 <div className="order-summary">
@@ -71,14 +71,14 @@ const OrderDetails = () => {
                         {order.items.map((item, index) => (
                             <div key={index} className="item">
                                 <span>{item.quantity}x {item.name}</span>
-                                <span>${(item.quantity * item.price).toFixed(2)}</span>
+                                <span>LKR {(item.quantity * item.price).toFixed(2)}</span>
                             </div>
                         ))}
                     </div>
                     <div className="totals">
                         <div className="total-row">
-                            <span>Subtotal</span>
-                            <span>${order.subtotal.toFixed(2)}</span>
+                            {/* <span>Subtotal</span>
+                            <span>LKR {order.subtotal.toFixed(2)}</span> */}
                         </div>
                         {/*<div className="total-row">*/}
                         {/*    <span>Tax</span>*/}
@@ -92,7 +92,7 @@ const OrderDetails = () => {
                         {/*)}*/}
                         <div className="total-row grand-total">
                             <span>Total</span>
-                            <span>${order.total.toFixed(2)}</span>
+                            <span>LKR {order.total.toFixed(2)}</span>
                         </div>
                     </div>
                 </div>

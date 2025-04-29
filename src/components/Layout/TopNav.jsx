@@ -35,7 +35,7 @@ import { useNavigate } from 'react-router-dom';
 
 const TopNav = () => {
     const navigate = useNavigate();
-    const userName = "Admin User"; // Define the user name here
+    const userName = "Savory"; // Define the user name here
 
     const handleProfileClick = () => {
         navigate('/dashboard/profile');
