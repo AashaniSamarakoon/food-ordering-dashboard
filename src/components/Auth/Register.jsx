@@ -167,6 +167,8 @@ const Register = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+
+        
         
         try {
             const registrationData = {
@@ -187,10 +189,10 @@ const Register = () => {
     
             console.log('Sending registration data:', registrationData);
             
-            const result = await dispatch(registerRestaurant(registrationData));
+            const response = dispatch(registerRestaurant(registrationData));
             
-            if (registerRestaurant.rejected.match(result)) {
-                const backendError = result.payload;
+            if (registerRestaurant.rejected.match(response)) {
+                const backendError = response.payload;
                 console.error('Backend error:', backendError);
                 
                 // Handle specific error cases

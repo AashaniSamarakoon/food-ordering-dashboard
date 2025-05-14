@@ -568,6 +568,68 @@
     text-align: center;
 }
 
+/* Verification error message */
+.verification-message {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .verification-button {
+    background-color: #17a2b8;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    margin-top: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+  }
+  
+  .verification-button:hover {
+    background-color: #138496;
+  }
+  
+  /* Status classes */
+  .status-verified {
+    color: #28a745;
+    font-weight: bold;
+  }
+  
+  .status-unverified {
+    color: #dc3545;
+    font-weight: bold;
+  }
+  
+  .status-result {
+    text-align: center;
+    padding: 20px;
+  }
+  
+  .status-message {
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    padding: 12px;
+    margin: 15px 0;
+  }
+  
+  .button-group {
+    margin-top: 20px;
+  }
+  
+  .check-status-link {
+    display: block;
+    margin-top: 15px;
+    text-align: center;
+    color: #007bff;
+    text-decoration: underline;
+  }
+
 /* Login Button */
 .login-button {
     width: 100%;
