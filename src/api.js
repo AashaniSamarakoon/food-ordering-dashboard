@@ -79,6 +79,11 @@ api.interceptors.response.use(
         statusText: error.response?.statusText,
         data: JSON.stringify(error.response?.data)
       });
+      
+      if (error.response.status === 401) {
+        console.warn('Authentication token expired or invalid, clearing token');
+        localStorage.removeItem('token');
+      }
     } else if (error.request) {
       console.error('No response received from API');
     } else {
@@ -88,7 +93,7 @@ api.interceptors.response.use(
   }
 );
 
-// Update the restaurant service API instance for better auth handling
+// Restaurant service API instance
 const restaurantServiceApi = axios.create({
   baseURL: 'http://localhost:8081/api',
   timeout: 10000,
@@ -102,25 +107,35 @@ const restaurantServiceApi = axios.create({
 // Add proper auth header to every request
 restaurantServiceApi.interceptors.request.use(
   config => {
+    console.log(`Restaurant API Request: ${config.method?.toUpperCase() || 'GET'} ${config.url}`);
+    
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  error => Promise.reject(error)
+  error => {
+    console.error('Restaurant API request error:', error);
+    return Promise.reject(error);
+  }
 );
 
 restaurantServiceApi.interceptors.response.use(
   response => {
-    console.log(`Received response from ${response.config.url}:`, response.status);
+    console.log(`Restaurant API response from ${response.config.url}:`, {
+      status: response.status,
+      statusText: response.statusText
+    });
     return response;
   },
   error => {
     if (error.response) {
-      console.error(`Error response from ${error.config?.url}:`, {
-        status: error.response.status,
-        data: error.response.data,
+      console.error('Restaurant API error response:', {
+        url: error.config?.url,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data
       });
       
       if (error.response.status === 401) {
@@ -130,13 +145,100 @@ restaurantServiceApi.interceptors.response.use(
         console.warn('User does not have required permissions');
       }
     } else if (error.request) {
-      console.error('No response received:', error.request);
+      console.error('No response received from restaurant API:', error.request);
     } else {
-      console.error('Request error:', error.message);
+      console.error('Restaurant API request error:', error.message);
     }
     return Promise.reject(error);
   }
 );
+
+// Restaurant service functions
+export const restaurantService = {
+  // Sync restaurant data from auth service
+  syncRestaurantData: async () => {
+    try {
+      console.log('Making direct call to restaurant sync API...');
+      
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('No token available for restaurant sync');
+        throw new Error('Authentication token required');
+      }
+      
+      // Make a direct axios call instead of using the instance
+      const response = await axios({
+        method: 'GET',
+        url: 'http://localhost:8081/api/restaurants/sync',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        withCredentials: true
+      });
+      
+      console.log('Restaurant sync response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Restaurant sync error in service:', error);
+      if (error.response) {
+        console.error('Response status:', error.response.status);
+        console.error('Response data:', error.response.data);
+      }
+      throw error;
+    }
+  },
+  // Get restaurant details for current user
+  getRestaurantDetails: async () => {
+    try {
+      const response = await restaurantServiceApi.get('/restaurants/my-restaurant');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching restaurant details:', error);
+      throw error;
+    }
+  },
+  
+  // Update restaurant details
+  updateRestaurantDetails: async (restaurantData) => {
+    try {
+      const response = await restaurantServiceApi.put('/restaurants/my-restaurant', restaurantData);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating restaurant details:', error);
+      throw error;
+    }
+  },
+  
+  // Check and create restaurant if needed
+  checkAndCreateRestaurant: async () => {
+    try {
+      // First, try to get current user's restaurant
+      try {
+        const restaurant = await restaurantService.getRestaurantDetails();
+        console.log('Restaurant exists:', restaurant);
+        return true;
+      } catch (error) {
+        // If restaurant doesn't exist, try to sync
+        if (error.response?.status === 404) {
+          try {
+            const syncedRestaurant = await restaurantService.syncRestaurantData();
+            console.log('Restaurant synced successfully:', syncedRestaurant);
+            return true;
+          } catch (syncError) {
+            console.error('Restaurant sync failed:', syncError);
+            return false;
+          }
+        }
+        return false;
+      }
+    } catch (error) {
+      console.error('Restaurant check/create failed:', error);
+      return false;
+    }
+  }
+};
 
 // Menu item API service (uses the restaurant service on port 8081)
 export const menuItemService = {
@@ -165,22 +267,10 @@ export const menuItemService = {
   // Create new menu item
   createMenuItem: async (menuItemData) => {
     try {
-      console.log('Making API request to create menu item:', menuItemData);
-      
       const response = await restaurantServiceApi.post('/menu-items', menuItemData);
-      console.log('Successful menu item creation:', response.data);
       return response.data;
     } catch (error) {
       console.error('Error creating menu item:', error);
-      if (error.response) {
-        console.error('Response data:', error.response.data);
-        console.error('Response status:', error.response.status);
-        console.error('Response headers:', error.response.headers);
-      } else if (error.request) {
-        console.error('No response received:', error.request);
-      } else {
-        console.error('Request error:', error.message);
-      }
       throw error;
     }
   },
@@ -241,38 +331,6 @@ export const menuItemService = {
     } catch (error) {
       console.error('Error fetching menu item:', error);
       throw error;
-    }
-  }
-};
-
-// Restaurant management service
-export const restaurantService = {
-  checkAndCreateRestaurant: async () => {
-    try {
-      // Try to get current user's restaurant
-      await menuItemService.getAllMenuItems();
-      return true; // Restaurant exists
-    } catch (error) {
-      if (error.response?.status === 404) {
-        try {
-          // Restaurant doesn't exist, create one
-          const defaultRestaurant = {
-            name: "My Restaurant",
-            description: "A great place to eat",
-            address: "123 Main St",
-            phone: "555-1234",
-            email: "restaurant@example.com"
-          };
-          
-          const response = await restaurantServiceApi.post('/restaurants', defaultRestaurant);
-          console.log('Restaurant created:', response.data);
-          return true;
-        } catch (createError) {
-          console.error('Failed to create restaurant:', createError);
-          return false;
-        }
-      }
-      return false;
     }
   }
 };

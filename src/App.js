@@ -1,6 +1,8 @@
 import {BrowserRouter as Router, Routes, Route, Navigate} from 'react-router-dom';
 import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { restaurantService } from './api';
+import { syncRestaurantData, selectCurrentToken } from './components/Auth/authSlice';
 import Sidebar from './components/Layout/Sidebar';
 import TopNav from './components/Layout/TopNav';
 import Dashboard from './components/Dashboard/Dashboard';
@@ -20,28 +22,24 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 
-
-
-
 function DashboardLayout() {
+    const dispatch = useDispatch();
+    const token = useSelector(selectCurrentToken);
 
     useEffect(() => {
-        // Check for restaurant when dashboard loads
-        const token = localStorage.getItem('token');
+        // When dashboard loads, if we have a token, ensure restaurant data is synced
         if (token) {
-            restaurantService.checkAndCreateRestaurant()
-                .then(success => {
-                    if (success) {
-                        console.log('Restaurant setup successful');
-                    } else {
-                        console.warn('Unable to verify restaurant setup');
-                    }
+            // Try to sync restaurant data silently in the background
+            dispatch(syncRestaurantData())
+                .unwrap()
+                .then(data => {
+                    console.log('Restaurant data synced on dashboard load:', data);
                 })
                 .catch(error => {
-                    console.error('Restaurant setup error:', error);
+                    console.warn('Could not sync restaurant data:', error);
                 });
         }
-    }, []);
+    }, [dispatch, token]);
 
     return (
         <div className="App">

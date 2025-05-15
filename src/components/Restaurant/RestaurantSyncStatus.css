@@ -1,0 +1,54 @@
+.restaurant-sync-status {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.restaurant-sync-status h3 {
+  margin-top: 0;
+  color: #333;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+  margin-bottom: 16px;
+}
+
+.restaurant-sync-status.loading {
+  color: #666;
+  text-align: center;
+  padding: 30px;
+}
+
+.restaurant-sync-status.error {
+  background-color: #fff5f5;
+  border-left: 4px solid #ff4d4f;
+}
+
+.restaurant-details {
+  margin-bottom: 16px;
+}
+
+.restaurant-details p {
+  margin: 8px 0;
+}
+
+.restaurant-sync-status button {
+  background-color: #1890ff;
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 14px;
+}
+
+.restaurant-sync-status button:hover {
+  background-color: #096dd9;
+}
+
+.restaurant-sync-status button:disabled {
+  background-color: #d9d9d9;
+  cursor: not-allowed;
+}

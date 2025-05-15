@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../../api';
+import axios from 'axios';
 
 // Async Thunks
 export const registerRestaurant = createAsyncThunk(
@@ -34,7 +35,6 @@ export const login = createAsyncThunk(
   'auth/login',
   async (credentials, { rejectWithValue }) => {
     try {
-      // Log that we're making the request (but don't log the password)
       console.log('Attempting login with email:', credentials.email);
       
       const response = await api({
@@ -51,13 +51,36 @@ export const login = createAsyncThunk(
       // Store token in localStorage
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
+        
+        try {
+          console.log('Starting restaurant sync after login...');
+          
+          // Make a direct API call to the restaurant sync endpoint
+          const syncResponse = await axios.get('http://localhost:8081/api/restaurants/sync', {
+            headers: {
+              'Authorization': `Bearer ${response.data.token}`
+            }
+          });
+          
+          console.log('Restaurant sync successful:', syncResponse.data);
+          
+          // Add restaurant data to the response
+          response.data.restaurantData = syncResponse.data;
+          
+        } catch (syncError) {
+          console.error('Restaurant sync error:', syncError);
+          if (syncError.response) {
+            console.error('Sync error details:', {
+              status: syncError.response.status,
+              data: JSON.stringify(syncError.response.data)
+            });
+          }
+          // We don't fail the login if sync fails
+        }
       }
 
       return response.data;
     } catch (err) {
-      // Log the full error for debugging
-      console.error("Login error:", err);
-      
       if (!err.response) {
         return rejectWithValue({
           message: 'Network error - could not connect to server',
@@ -65,33 +88,71 @@ export const login = createAsyncThunk(
         });
       }
 
-      // Log the error data for debugging
-      console.error('Error response data:', err.response.data);
-      console.error('Error status code:', err.response.status);
-
-      // Handle 403 errors (account not verified)
-      if (err.response.status === 403) {
-        // Extract the error message from the response
-        const errorMessage = err.response.data?.message || 
-                           err.response.data?.error || 
-                           'Your account has not been verified yet.';
-                           
+      // Special handling for verification errors
+      if (err.response.status === 403 && 
+          (err.response.data.error === 'Account Not Verified' || 
+           err.response.data.message?.includes('not been verified'))) {
         return rejectWithValue({
-          message: errorMessage,
-          status: 403,
-          isVerificationError: true
+          message: err.response.data.message || 'Your account has not been verified yet.',
+          status: err.response.status,
+          verification: false
         });
       }
-      
-      // Handle other error responses
+
       const errorData = err.response.data || {};
       return rejectWithValue({
-        message: errorData.message || errorData.error || 'Authentication failed',
-        status: err.response.status
+        message: errorData.message || 'Authentication failed',
+        status: err.response.status,
+        errors: errorData.errors
       });
     }
   }
 );
+
+// Add the missing syncRestaurantData thunk
+export const syncRestaurantData = createAsyncThunk(
+  'auth/syncRestaurantData',
+  async (_, { getState, rejectWithValue }) => {
+    try {
+      // Get token from state or localStorage
+      const token = getState().auth.token || localStorage.getItem('token');
+      
+      if (!token) {
+        console.error('No authentication token available for sync');
+        return rejectWithValue({ message: 'No authentication token available' });
+      }
+      
+      console.log('Syncing restaurant data with token:', token.substring(0, 15) + '...');
+      
+      // Make a direct axios call to ensure proper headers
+      const response = await axios({
+        method: 'GET',
+        url: 'http://localhost:8081/api/restaurants/sync',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+      
+      console.log('Restaurant sync successful:', response.data);
+      return response.data;
+    } catch (err) {
+      console.error('Restaurant sync error in thunk:', err);
+      
+      // Extract detailed error information
+      const errorData = {
+        message: err.response?.data?.message || err.message || 'Failed to sync restaurant data',
+        status: err.response?.status,
+        data: err.response?.data
+      };
+      
+      console.error('Error details:', errorData);
+      return rejectWithValue(errorData);
+    }
+  }
+);
+
 const initialState = {
   token: localStorage.getItem('token') || null,
   userInfo: {
@@ -100,10 +161,13 @@ const initialState = {
     role: null,
     isVerified: false
   },
+  restaurantInfo: null,
   isLoading: false,
-  registrationStatus: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
+  registrationStatus: 'idle',
+  syncStatus: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
+  syncError: null,
   error: null,
-  verificationMessage: null // New field to store verification status messages
+  verificationMessage: null
 };
 
 const authSlice = createSlice({
@@ -158,6 +222,11 @@ const authSlice = createSlice({
           role: action.payload.role,
           isVerified: action.payload.isVerified
         };
+        // Store restaurant data if available
+        if (action.payload.restaurantData) {
+          state.restaurantInfo = action.payload.restaurantData;
+          state.syncStatus = 'succeeded';
+        }
         state.error = null;
       })
       .addCase(login.rejected, (state, action) => {
@@ -168,6 +237,21 @@ const authSlice = createSlice({
           status: action.payload?.status,
           errors: action.payload?.errors
         };
+      })
+      
+      // Restaurant sync
+      .addCase(syncRestaurantData.pending, (state) => {
+        state.syncStatus = 'loading';
+        state.syncError = null;
+      })
+      .addCase(syncRestaurantData.fulfilled, (state, action) => {
+        state.syncStatus = 'succeeded';
+        state.restaurantInfo = action.payload;
+        state.syncError = null;
+      })
+      .addCase(syncRestaurantData.rejected, (state, action) => {
+        state.syncStatus = 'failed';
+        state.syncError = action.payload || 'Failed to sync restaurant data';
       });
   }
 });
@@ -177,8 +261,10 @@ export const { logout, clearRegistrationStatus, clearError } = authSlice.actions
 // Selectors
 export const selectCurrentToken = (state) => state.auth.token;
 export const selectCurrentUser = (state) => state.auth.userInfo;
+export const selectRestaurantInfo = (state) => state.auth.restaurantInfo;
 export const selectIsLoading = (state) => state.auth.isLoading;
 export const selectRegistrationStatus = (state) => state.auth.registrationStatus;
 export const selectAuthError = (state) => state.auth.error;
+export const selectSyncStatus = (state) => state.auth.syncStatus;
 
 export default authSlice.reducer;

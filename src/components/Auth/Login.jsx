@@ -168,10 +168,10 @@
 
 // export default Login;
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { login, selectAuthError, clearError } from './authSlice';
+import { useDispatch } from 'react-redux';
+import { login } from './authSlice';
 import './styles/auth.css';
 
 const Login = () => {
@@ -180,103 +180,55 @@ const Login = () => {
         password: ''
     });
     const [error, setError] = useState('');
-    const [isVerificationError, setIsVerificationError] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
     const navigate = useNavigate();
     const location = useLocation();
     const dispatch = useDispatch();
-    const authError = useSelector(selectAuthError);
 
-    // Clear errors on component unmount
-    useEffect(() => {
-        return () => {
-            dispatch(clearError());
-        };
-    }, [dispatch]);
-
-    // Handle auth errors from Redux
-    useEffect(() => {
-        if (authError) {
-            console.log('Auth error received:', authError);
-            setError(authError.message || 'Authentication failed');
-            setIsVerificationError(authError.isVerificationError || false);
-        } else {
-            setError('');
-            setIsVerificationError(false);
-        }
-    }, [authError]);
-
-    const checkLoginStatus = async () => {
-        try {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                console.log("No token found in localStorage");
-                return;
-            }
-            
-            console.log("Current token:", token.substring(0, 15) + "...");
-            
-            try {
-                const base64Url = token.split('.')[1];
-                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
-                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                }).join(''));
-                
-                const payload = JSON.parse(jsonPayload);
-                console.log("Token payload:", payload);
-                
-                if (payload.exp) {
-                    const expirationDate = new Date(payload.exp * 1000);
-                    if (expirationDate < new Date()) {
-                        console.log("Token is expired");
-                    } else {
-                        console.log("Token is valid until:", expirationDate);
-                    }
-                }
-            } catch (e) {
-                console.log("Could not decode token - it might not be a standard JWT");
-            }
-        } catch (error) {
-            console.error("Error checking login status:", error);
-        }
-    };
-    
-    useEffect(() => {
-        checkLoginStatus();
-    }, []);
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError('');
-        setIsVerificationError(false);
-        setIsLoading(true);
+const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
+  
+    try {
+      console.log('Submitting login with email:', credentials.email);
+      
+      // Log the token before login (if any)
+      const existingToken = localStorage.getItem('token');
+      console.log('Existing token before login:', existingToken ? 'Present' : 'None');
+      
+      const resultAction = await dispatch(login(credentials));
+      console.log('Login action result type:', resultAction.type);
+      
+      if (login.fulfilled.match(resultAction)) {
+        console.log('Login successful, payload:', resultAction.payload);
         
-        try {
-            console.log('Submitting login form...');
-            const resultAction = await dispatch(login(credentials));
-            console.log('Login result action:', resultAction);
-            
-            if (login.fulfilled.match(resultAction)) {
-                console.log('Login successful, navigating to dashboard');
-                const from = location.state?.from?.pathname || '/dashboard';
-                navigate(from, { replace: true });
-            } else if (login.rejected.match(resultAction)) {
-                console.log('Login rejected:', resultAction.payload);
-                // The error will be handled by the useEffect that watches authError
-            }
-        } catch (err) {
-            console.error('Unexpected error during login:', err);
-            setError('An unexpected error occurred during login');
-        } finally {
-            setIsLoading(false);
+        // Log the received token
+        console.log('Token received:', resultAction.payload.token ? 'Present' : 'Missing');
+        
+        // Check if restaurant data was synced
+        if (resultAction.payload.restaurantData) {
+          console.log('Restaurant data synced with login:', resultAction.payload.restaurantData);
+        } else {
+          console.warn('No restaurant data received with login');
         }
-    };
-
-    const handleCheckStatus = () => {
-        navigate('/check-status', { state: { email: credentials.email } });
-    };
+        
+        // Now navigate to dashboard
+        const from = location.state?.from?.pathname || '/dashboard';
+        navigate(from, { replace: true });
+      } else if (login.rejected.match(resultAction)) {
+        const errorMessage = resultAction.payload?.message || 'Login failed';
+        console.error('Login rejected:', errorMessage);
+        setError(errorMessage);
+      }
+    } catch (err) {
+      console.error('Unexpected error during login:', err);
+      setError('An unexpected error occurred during login');
+    } finally {
+      setIsLoading(false);
+    }
+};
 
     return (
         <div className="login-container">
@@ -286,19 +238,7 @@ const Login = () => {
                     <p>Welcome back! Please enter your credentials</p>
                 </div>
 
-                {isVerificationError ? (
-                    <div className="verification-message">
-                        <p>{error}</p>
-                        <button 
-                            className="verification-button"
-                            onClick={handleCheckStatus}
-                        >
-                            Check Account Status
-                        </button>
-                    </div>
-                ) : error ? (
-                    <div className="login-error">{error}</div>
-                ) : null}
+                {error && <div className="login-error">{error}</div>}
 
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
@@ -338,7 +278,7 @@ const Login = () => {
 
                 <div className="login-footer">
                     <p>Don't have an account? <a href="/register">Register</a></p>
-                    <a href="/check-status" className="check-status-link">Check account verification status</a>
+                    <a href="/check-status" className="forgot-password">Check account status</a>
                 </div>
             </div>
         </div>
