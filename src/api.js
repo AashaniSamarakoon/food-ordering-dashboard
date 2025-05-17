@@ -37,6 +37,22 @@
 // export default api;
 
 import axios from 'axios';
+// import { makeXhrRequest } from './utils/apiUtilsXhr';
+
+const logApiError = (error) => {
+  console.error('API Error:', error);
+  if (error.response) {
+    console.error('Status:', error.response.status);
+    console.error('Data:', error.response.data);
+    console.error('Headers:', error.response.headers);
+  } else if (error.request) {
+    console.error('No response received');
+    console.error('Request:', error.request);
+  } else {
+    console.error('Error setting up request:', error.message);
+  }
+  console.error('Config:', error.config);
+};
 
 // Main API instance (original service)
 const api = axios.create({
@@ -54,8 +70,13 @@ api.interceptors.request.use(
   config => {
     console.log(`Making ${config.method?.toUpperCase() || 'GET'} request to: ${config.baseURL}${config.url}`);
     
+    // Add content-type for authentication request explicitly
+    if (config.url && config.url.includes('/auth/authenticate')) {
+      config.headers['Content-Type'] = 'application/json';
+    }
+    
     const token = localStorage.getItem('token');
-    if (token) {
+    if (token && token !== 'undefined' && token !== 'null') {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -65,7 +86,6 @@ api.interceptors.request.use(
     return Promise.reject(error);
   }
 );
-
 api.interceptors.response.use(
   response => {
     console.log(`Response from ${response.config.url}: Status ${response.status}`);
@@ -243,15 +263,41 @@ export const restaurantService = {
 // Menu item API service (uses the restaurant service on port 8081)
 export const menuItemService = {
   // Get all menu items (authenticated)
-  getAllMenuItems: async () => {
-    try {
-      const response = await restaurantServiceApi.get('/menu-items/my-restaurant');
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching menu items:', error);
-      throw error;
+// Inside your menuItemService object:
+
+// In your menuItemService, modify getAllMenuItems to ensure imageUrl is consistent:
+
+getAllMenuItems: async () => {
+  try {
+    console.log('Fetching all menu items...');
+    const response = await restaurantServiceApi.get('/menu-items/my-restaurant');
+    console.log('Menu items API response:', response);
+    
+    let items = [];
+    
+    // If the response has a 'content' property, it's paginated
+    if (response.data && response.data.content && Array.isArray(response.data.content)) {
+      items = response.data.content;
     }
-  },
+    // If it's directly an array, use it
+    else if (Array.isArray(response.data)) {
+      items = response.data;
+    }
+    
+    // Ensure each item has an imageUrl property (even if empty)
+    const processedItems = items.map(item => ({
+      ...item,
+      imageUrl: item.imageUrl || "" // Ensure imageUrl exists
+    }));
+    
+    return processedItems;
+  } catch (error) {
+    console.error('Error fetching menu items:', error);
+    throw error;
+  }
+},
+
+  
 
   // Get public menu items for a specific restaurant (no auth required)
   getPublicMenuItems: async (restaurantId = 1) => {
@@ -265,15 +311,33 @@ export const menuItemService = {
   },
 
   // Create new menu item
-  createMenuItem: async (menuItemData) => {
-    try {
-      const response = await restaurantServiceApi.post('/menu-items', menuItemData);
-      return response.data;
-    } catch (error) {
-      console.error('Error creating menu item:', error);
-      throw error;
+createMenuItem: async (menuItemData) => {
+  try {
+    console.log('Creating menu item with data:', menuItemData);
+    
+    // Create a copy of the data to avoid modifying the original
+    const apiData = {...menuItemData};
+    
+    // Ensure status is in correct format if not already
+    if (apiData.status === 'Available') {
+      apiData.status = 'AVAILABLE';
+    } else if (apiData.status === 'Out of Stock') {
+      apiData.status = 'OUT_OF_STOCK';
     }
-  },
+    
+    console.log('Sending to API:', apiData);
+    
+    const response = await restaurantServiceApi.post('/menu-items', apiData);
+    console.log('Menu item created successfully:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating menu item:', error);
+    if (error.response) {
+      console.error('Error response:', error.response.data);
+    }
+    throw error;
+  }
+},
 
   // Create menu item with image upload
   createMenuItemWithImage: async (formData) => {
@@ -291,16 +355,25 @@ export const menuItemService = {
   },
 
   // Update menu item
-  updateMenuItem: async (id, menuItemData) => {
-    try {
-      const response = await restaurantServiceApi.put(`/menu-items/${id}`, menuItemData);
-      return response.data;
-    } catch (error) {
-      console.error('Error updating menu item:', error);
-      throw error;
+updateMenuItem: async (id, menuItemData) => {
+  try {
+    // Create a copy of the data to avoid modifying the original
+    const apiData = {...menuItemData};
+    
+    // Ensure status is in correct format if not already
+    if (apiData.status === 'Available') {
+      apiData.status = 'AVAILABLE';
+    } else if (apiData.status === 'Out of Stock') {
+      apiData.status = 'OUT_OF_STOCK';
     }
-  },
-
+    
+    const response = await restaurantServiceApi.put(`/menu-items/${id}`, apiData);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating menu item:', error);
+    throw error;
+  }
+},
   // Delete menu item
   deleteMenuItem: async (id) => {
     try {

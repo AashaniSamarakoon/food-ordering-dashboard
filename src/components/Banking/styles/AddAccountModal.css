@@ -1,0 +1,389 @@
+/* Modal overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+/* Modal container */
+.account-modal {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  position: relative;
+}
+
+/* Modal header */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.modal-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.modal-icon {
+  font-size: 20px;
+  color: #956831;
+}
+
+.modal-title h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #2D3748;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #7f8c8d;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  transition: all 0.2s;
+}
+
+.close-button:hover {
+  background-color: #f5f7fc;
+  color: #34495e;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #A0AEC0;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.close-btn:hover {
+  color: #718096;
+}
+
+/* Modal body */
+.modal-body {
+  padding: 24px;
+  overflow-y: auto;
+}
+
+/* Form styles */
+.form-step {
+  animation: fadeIn 0.3s ease;
+}
+
+.form-step h4 {
+  margin-top: 0;
+  margin-bottom: 24px;
+  font-size: 18px;
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group.has-error label {
+  color: #e74c3c;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #4A5568;
+}
+
+.required {
+  color: #e74c3c;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 16px;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  background-color: #fff;
+  transition: all 0.2s;
+  color: #2D3748;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #4299E1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+  outline: none;
+}
+
+.form-group input.error,
+.form-group select.error {
+  border-color: #e74c3c;
+}
+
+.form-group input.error:focus,
+.form-group select.error:focus {
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2);
+}
+
+.form-group input::placeholder {
+  color: #A0AEC0;
+}
+
+.error-message {
+  color: #e74c3c;
+  font-size: 12px;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.field-hint {
+  color: #7f8c8d;
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+/* Currency input */
+.currency-input {
+  position: relative;
+}
+
+.currency-symbol {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #7f8c8d;
+}
+
+.currency-input input {
+  padding-left: 50px;
+}
+
+/* Account type options */
+.account-type-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.account-type-option {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid #dcdfe6;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.account-type-option:hover {
+  background-color: #f5f7fc;
+}
+
+.account-type-option.selected {
+  border-color: #4a6bdf;
+  background-color: #f0f4ff;
+}
+
+.type-icon {
+  background-color: #e1e5eb;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  color: #7f8c8d;
+  transition: all 0.2s;
+}
+
+.account-type-option.selected .type-icon {
+  background-color: #4a6bdf;
+  color: white;
+}
+
+.type-details {
+  flex: 1;
+}
+
+.type-name {
+  font-weight: 500;
+  color: #2c3e50;
+  margin-bottom: 4px;
+}
+
+.type-description {
+  font-size: 12px;
+  color: #7f8c8d;
+}
+
+.type-checkbox {
+  width: 24px;
+  height: 24px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4a6bdf;
+}
+
+.account-type-option.selected .type-checkbox {
+  background-color: #4a6bdf;
+  border-color: #4a6bdf;
+  color: white;
+}
+
+/* Form actions */
+.step-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.back-button {
+  background-color: #f5f7fc;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  padding: 10px 16px;
+  font-weight: 500;
+  color: #7f8c8d;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.back-button:hover {
+  background-color: #e9edf7;
+}
+
+.next-button,
+.submit-button {
+  background-color: #4a6bdf;
+  border: none;
+  border-radius: 4px;
+  padding: 12px 20px;
+  font-weight: 500;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.next-button:hover,
+.submit-button:hover {
+  background-color: #3658ca;
+}
+
+.next-button:disabled,
+.submit-button:disabled {
+  background-color: #a0aec0;
+  cursor: not-allowed;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.cancel-btn {
+  padding: 10px 16px;
+  border: 1px solid #E2E8F0;
+  background: white;
+  color: #4A5568;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancel-btn:hover {
+  background: #F7FAFC;
+}
+
+.save-btn {
+  padding: 10px 16px;
+  background: #4299E1;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.save-btn:hover {
+  background: #3182CE;
+}
+
+.save-btn:disabled {
+  background: #A0AEC0;
+  cursor: not-allowed;
+}
+
+/* Spinner for loading state */
+.submit-button .spinner {
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

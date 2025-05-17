@@ -15,22 +15,16 @@ const AddMenuItem = () => {
         try {
             setLoading(true);
             
-            console.log('Form data:', formData);
+            console.log('Form data to submit:', formData);
             
-            // Convert frontend status format to backend format
-            const statusMapping = {
-                'Available': 'AVAILABLE',
-                'Out of Stock': 'OUT_OF_STOCK'
-            };
-            
-            // Prepare JSON data without file
+            // Prepare JSON data
             const menuItemData = {
                 name: formData.name,
                 category: formData.category,
                 price: parseFloat(formData.price),
-                status: statusMapping[formData.status],
+                status: formData.status, 
                 description: formData.description || "",
-                imageUrl: previewImage || "" // Use the preview image URL
+                imageUrl: formData.imageUrl || previewImage || "https://via.placeholder.com/150?text=No+Image" // Use URL or preview image
             };
             
             console.log('Sending to API:', menuItemData);
@@ -44,15 +38,16 @@ const AddMenuItem = () => {
         } catch (error) {
             console.error('Failed to add menu item:', error);
             
-            // More detailed error message
-            let errorMessage = 'Failed to add menu item. Please try again.';
+            let errorMessage = 'Failed to add menu item.';
+            
+            // Extract more specific error details if available
             if (error.response) {
-                if (error.response.status === 401) {
-                    errorMessage = 'Authentication failed. Please log in again.';
-                } else if (error.response.status === 403) {
-                    errorMessage = 'You do not have permission to add menu items.';
-                } else if (error.response.data && error.response.data.message) {
-                    errorMessage = `Error: ${error.response.data.message}`;
+                console.error('API Error Details:', error.response.data);
+                
+                if (error.response.data && error.response.data.details) {
+                    errorMessage += ' ' + error.response.data.details;
+                } else if (error.response.data && error.response.data.error) {
+                    errorMessage += ' ' + error.response.data.error;
                 }
             }
             
@@ -96,7 +91,8 @@ const AddMenuItem = () => {
                     category: 'Pizza',
                     price: '',
                     status: 'Available',
-                    description: ''
+                    description: '',
+                    imageUrl: ''
                 }}
             />
         </div>

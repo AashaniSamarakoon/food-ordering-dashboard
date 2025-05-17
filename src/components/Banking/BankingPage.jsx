@@ -1,87 +1,176 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import AccountCard from './AccountCard';
 import TransactionList from './TransactionList';
 import AddAccountModal from './AddAccountModal';
+import bankingService from '../../services/bankingService';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus, faSyncAlt, faUniversity } from '@fortawesome/free-solid-svg-icons';
 import './styles/BankingPage.css';
 
 const BankingPage = () => {
-    const [accounts, setAccounts] = useState([
-        {
-            id: 1,
-            bankName: 'BOC',
-            accountNumber: '****3456',
-            accountType: 'Business Checking',
-            balance: 12500.75,
-            color: '#4a6bdf'
-        },
-        {
-            id: 2,
-            bankName: 'HND',
-            accountNumber: '****7821',
-            accountType: 'Savings',
-            balance: 32500.25,
-            color: '#ff6b6b'
-        }
-    ]);
-
-    const [transactions, setTransactions] = useState([
-        {
-            id: 1,
-            date: '2023-06-15',
-            description: 'From APP',
-            amount: 1250.50,
-            account: 'Chase Bank'
-        },
-        {
-            id: 2,
-            date: '2023-06-14',
-            description: 'From APP',
-            amount: 3845.75,
-            account: 'Chase Bank'
-        }
-    ]);
-
+    const [accounts, setAccounts] = useState([]);
+    const [transactions, setTransactions] = useState([]);
     const [showModal, setShowModal] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    const handleAddAccount = (newAccount) => {
-        setAccounts([...accounts, {
-            ...newAccount,
-            id: accounts.length + 1,
-            color: `#${Math.floor(Math.random()*16777215).toString(16)}`
-        }]);
-        setShowModal(false);
+    useEffect(() => {
+        fetchAccounts();
+    }, []);
+
+    const fetchAccounts = async () => {
+        try {
+            setIsLoading(true);
+            setError(null);
+            
+            const fetchedAccounts = await bankingService.getAllAccounts();
+            console.log("Fetched accounts:", fetchedAccounts);
+            setAccounts(fetchedAccounts || []);
+            
+            // Also fetch recent transactions if you have that endpoint
+            // const fetchedTransactions = await bankingService.getRecentTransactions();
+            // setTransactions(fetchedTransactions || []);
+            
+        } catch (error) {
+            console.error("Error fetching banking data:", error);
+            setError("Failed to load banking information. Please try again later.");
+            toast.error("Could not connect to banking service");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleAddAccount = async (accountData) => {
+        try {
+            setIsLoading(true);
+            
+            const newAccount = await bankingService.createAccount(accountData);
+            console.log("Account created:", newAccount);
+            
+            // Refresh accounts list
+            await fetchAccounts();
+            
+            // Close modal and show success message
+            setShowModal(false);
+            toast.success("Bank account added successfully!");
+        } catch (error) {
+            console.error("Error creating account:", error);
+            
+            let errorMessage = "Failed to add bank account";
+            if (error.response?.data?.message) {
+                errorMessage = error.response.data.message;
+            }
+            
+            toast.error(errorMessage);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
-        <div className="banking-page">
+        <div className="banking-container">
+            {/* Header with title and actions */}
             <div className="banking-header">
-                <h2>Restaurant Banking</h2>
-                <button
-                    className="add-account-btn"
-                    onClick={() => setShowModal(true)}
-                >
-                    + Add Bank Account
-                </button>
-            </div>
-
-            <div className="accounts-section">
-                <h3>Bank Accounts</h3>
-                <div className="accounts-grid">
-                    {accounts.map(account => (
-                        <AccountCard key={account.id} account={account} />
-                    ))}
+                <div className="banking-title">
+                    <FontAwesomeIcon icon={faUniversity} className="banking-icon" />
+                    <h2>Banking</h2>
+                </div>
+                
+                <div className="banking-actions">
+                    <button 
+                        className="refresh-button" 
+                        onClick={fetchAccounts} 
+                        disabled={isLoading}
+                        title="Refresh banking data"
+                    >
+                        <FontAwesomeIcon icon={faSyncAlt} spin={isLoading} />
+                    </button>
+                    
+                    <button 
+                        className="add-account-button" 
+                        onClick={() => setShowModal(true)}
+                        disabled={isLoading}
+                    >
+                        <FontAwesomeIcon icon={faPlus} /> Add Account
+                    </button>
                 </div>
             </div>
 
-            <div className="transactions-section">
-                <h3>Recent Transactions</h3>
-                <TransactionList transactions={transactions} />
+            {/* Accounts section */}
+            <div className="section-container">
+                <div className="section-header">
+                    <h3>Accounts</h3>
+                </div>
+                
+                <div className="section-content">
+                    {isLoading ? (
+                        <div className="loading-container">
+                            <div className="spinner"></div>
+                            <p>Loading accounts...</p>
+                        </div>
+                    ) : error ? (
+                        <div className="error-container">
+                            <p>{error}</p>
+                            <button onClick={fetchAccounts}>Try Again</button>
+                        </div>
+                    ) : accounts.length === 0 ? (
+                        <div className="empty-container">
+                            <div className="empty-illustration">
+                                <FontAwesomeIcon icon={faUniversity} size="3x" />
+                            </div>
+                            <h4>No bank accounts found</h4>
+                            <p>Add your first account to get started with banking management.</p>
+                            <button className="add-first-button" onClick={() => setShowModal(true)}>
+                                <FontAwesomeIcon icon={faPlus} /> Add Your First Account
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="accounts-grid">
+                            {accounts.map(account => (
+                                <AccountCard 
+                                    key={account.id} 
+                                    account={account}
+                                    onViewDetails={(id) => {
+                                        toast.info(`Viewing account ${id} details`);
+                                        // Implement view details functionality
+                                    }}
+                                />
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
-
+            
+            {/* Recent transactions section */}
+            <div className="section-container">
+                <div className="section-header">
+                    <h3>Recent Transactions</h3>
+                </div>
+                
+                <div className="section-content">
+                    {isLoading ? (
+                        <div className="loading-container">
+                            <div className="spinner"></div>
+                            <p>Loading transactions...</p>
+                        </div>
+                    ) : transactions.length === 0 ? (
+                        <div className="empty-container transactions-empty">
+                            <h4>No recent transactions</h4>
+                            <p>Recent banking transactions will appear here.</p>
+                        </div>
+                    ) : (
+                        <TransactionList transactions={transactions} />
+                    )}
+                </div>
+            </div>
+            
+            {/* Add account modal */}
             {showModal && (
-                <AddAccountModal
+                <AddAccountModal 
                     onClose={() => setShowModal(false)}
                     onSave={handleAddAccount}
+                    isLoading={isLoading}
                 />
             )}
         </div>

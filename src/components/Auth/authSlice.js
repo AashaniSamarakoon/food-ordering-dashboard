@@ -37,6 +37,7 @@ export const login = createAsyncThunk(
     try {
       console.log('Attempting login with email:', credentials.email);
       
+      // Login API call
       const response = await api({
         method: 'POST',
         url: '/auth/authenticate',
@@ -46,25 +47,31 @@ export const login = createAsyncThunk(
         }
       });
 
-      console.log('Login response:', response.data);
+      console.log('Login successful:', response.data);
       
       // Store token in localStorage
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
         
+        // Wait a moment for the token to be properly stored
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        // Call the sync endpoint to make sure restaurant data is synced
         try {
           console.log('Starting restaurant sync after login...');
           
-          // Make a direct API call to the restaurant sync endpoint
-          const syncResponse = await axios.get('http://localhost:8081/api/restaurants/sync', {
+          // Use the working GET endpoint exactly as in Postman
+          const syncResponse = await axios({
+            method: 'GET',
+            url: 'http://localhost:8081/api/restaurants/sync',
             headers: {
-              'Authorization': `Bearer ${response.data.token}`
-            }
+              'Authorization': `Bearer ${response.data.token}`,
+              'Content-Type': 'application/json'
+            },
+            withCredentials: true
           });
           
           console.log('Restaurant sync successful:', syncResponse.data);
-          
-          // Add restaurant data to the response
           response.data.restaurantData = syncResponse.data;
           
         } catch (syncError) {
@@ -72,30 +79,20 @@ export const login = createAsyncThunk(
           if (syncError.response) {
             console.error('Sync error details:', {
               status: syncError.response.status,
-              data: JSON.stringify(syncError.response.data)
+              data: syncError.response.data
             });
           }
-          // We don't fail the login if sync fails
         }
       }
 
       return response.data;
     } catch (err) {
+      console.error('Login error:', err);
+      
       if (!err.response) {
         return rejectWithValue({
           message: 'Network error - could not connect to server',
           status: 0
-        });
-      }
-
-      // Special handling for verification errors
-      if (err.response.status === 403 && 
-          (err.response.data.error === 'Account Not Verified' || 
-           err.response.data.message?.includes('not been verified'))) {
-        return rejectWithValue({
-          message: err.response.data.message || 'Your account has not been verified yet.',
-          status: err.response.status,
-          verification: false
         });
       }
 

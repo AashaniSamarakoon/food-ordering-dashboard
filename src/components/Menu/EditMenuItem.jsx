@@ -17,7 +17,8 @@ const EditMenuItem = () => {
         category: 'Pizza',
         price: '',
         status: 'Available',
-        description: ''
+        description: '',
+        imageUrl: ''
     });
 
     useEffect(() => {
@@ -25,11 +26,14 @@ const EditMenuItem = () => {
         if (location.state?.item) {
             const item = location.state.item;
             setInitialValues({
+                id: item.id,
                 name: item.name,
                 category: item.category,
                 price: item.price.toString(),
-                status: item.status,
-                description: item.description || ''
+                // Map the backend status to frontend status format
+                status: item.status === 'AVAILABLE' ? 'Available' : 'Out of Stock',
+                description: item.description || '',
+                imageUrl: item.imageUrl || ''
             });
             setPreviewImage(item.imageUrl);
         } else {
@@ -41,20 +45,26 @@ const EditMenuItem = () => {
     const fetchMenuItem = async () => {
         try {
             setLoading(true);
+            
+            // Fetch from API
             const item = await menuItemService.getMenuItem(id);
             
             setInitialValues({
+                id: item.id,
                 name: item.name,
                 category: item.category,
                 price: item.price.toString(),
+                // Map the backend status to frontend status format
                 status: item.status === 'AVAILABLE' ? 'Available' : 'Out of Stock',
-                description: item.description || ''
+                description: item.description || '',
+                imageUrl: item.imageUrl || ''
             });
             
             setPreviewImage(item.imageUrl);
         } catch (error) {
             console.error('Failed to fetch menu item:', error);
             toast.error('Failed to load menu item details');
+            navigate('/dashboard/menu');
         } finally {
             setLoading(false);
         }
@@ -64,40 +74,28 @@ const EditMenuItem = () => {
         try {
             setLoading(true);
             
-            // Convert frontend status format to backend format
-            const statusMapping = {
-                'Available': 'AVAILABLE',
-                'Out of Stock': 'OUT_OF_STOCK'
+            // Convert status to backend format
+            const status = formData.status === 'Available' ? 'AVAILABLE' : 
+                          formData.status === 'Out of Stock' ? 'OUT_OF_STOCK' : 
+                          formData.status;
+                          
+            // Use image from file upload or from URL input
+            const imageUrl = previewImage || formData.imageUrl || "";
+            
+            // Prepare data for API
+            const menuItemData = {
+                name: formData.name,
+                category: formData.category,
+                price: parseFloat(formData.price),
+                status: status,
+                description: formData.description || "",
+                imageUrl: imageUrl
             };
             
-            // Check if we have an actual file to upload
-            const imageFile = fileInputRef.current?.files[0];
-            if (imageFile) {
-                // For file upload we'd normally use FormData
-                const apiFormData = new FormData();
-                apiFormData.append('name', formData.name);
-                apiFormData.append('category', formData.category);
-                apiFormData.append('price', parseFloat(formData.price));
-                apiFormData.append('status', statusMapping[formData.status]);
-                apiFormData.append('description', formData.description || '');
-                apiFormData.append('image', imageFile);
-                
-                // Use the special method for file upload (this would need to be implemented)
-                await menuItemService.updateMenuItemWithImage(id, apiFormData);
-            } else {
-                // Prepare data for API
-                const menuItemData = {
-                    name: formData.name,
-                    category: formData.category,
-                    price: parseFloat(formData.price),
-                    status: statusMapping[formData.status],
-                    description: formData.description || "",
-                    imageUrl: formData.image
-                };
-                
-                // Call API to update menu item
-                await menuItemService.updateMenuItem(id, menuItemData);
-            }
+            console.log('Updating menu item with data:', menuItemData);
+            
+            // Call API to update menu item
+            await menuItemService.updateMenuItem(id, menuItemData);
             
             toast.success('Menu item updated successfully!');
             navigate('/dashboard/menu');
