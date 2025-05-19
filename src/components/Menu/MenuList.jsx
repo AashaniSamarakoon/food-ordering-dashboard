@@ -4,6 +4,8 @@ import './styles/Menu.css';
 import { Link } from "react-router-dom";
 import { menuItemService } from '../../api';
 import { toast } from 'react-toastify';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSync } from '@fortawesome/free-solid-svg-icons';
 
 const MenuList = () => {
     const [menuItems, setMenuItems] = useState([]);
@@ -75,6 +77,15 @@ const MenuList = () => {
         toast.info('Refreshing menu items...');
     };
 
+    const refreshButtonStyle = {
+        background: 'none',
+        border: 'none',
+        cursor: 'pointer',
+        padding: '8px',
+        color: '#000',
+        fontSize: '16px'
+    };
+
     // Handle deleting a menu item
     const handleDeleteItem = async (id) => {
         if (window.confirm('Are you sure you want to delete this item?')) {
@@ -122,18 +133,13 @@ const MenuList = () => {
                         + Add New Item
                     </Link>
                     
-                    {/* Refresh button */}
+                    {/* Refresh button with FontAwesome icon */}
                     <button 
                         onClick={handleRefresh}
-                        style={{
-                            padding: '10px 15px',
-                            backgroundColor: '#0d6efd',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px'
-                        }}
+                        style={refreshButtonStyle}
+                        title="Refresh menu items"
                     >
-                        ↻ Refresh List
+                        <FontAwesomeIcon icon={faSync} />
                     </button>
                 </div>
             </div>

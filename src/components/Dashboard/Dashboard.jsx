@@ -1,4 +1,5 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 import DashboardCard from './DashboardCard';
 import Charts from './Charts';
 import OrderHistory from './OrderHistory';
@@ -11,6 +12,7 @@ import pastaImg from './images/pasta.jpg';
 import sushiImg from './images/sushi.jpg';
 
 const Dashboard = () => {
+    const userInfo = useSelector(state => state.auth.userInfo);
     const foodItems = [
         { img: burgerImg, name: 'Burger', color: '#E28445' },
         { img: pizzaImg, name: 'Pizza', color: '#F44336' },
@@ -20,9 +22,6 @@ const Dashboard = () => {
 
     return (
         <div className="dashboard-container">
-            {/* <h1 className="dashboard-title">FoodDash Overview</h1> */}
-            
-            {/* Square Food Images Container */}
             <div className="square-food-container">
                 {foodItems.map((item, index) => (
                     <div key={index} className="square-food-item" style={{ borderColor: item.color }}>
@@ -36,9 +35,8 @@ const Dashboard = () => {
                 ))}
             </div>
 
-            <h1 className="dashboard-title">Savory Overview</h1>
+            <h1 className="dashboard-title">{userInfo?.restaurantName || 'Restaurant'} Overview</h1>
 
-            {/* Rest of your existing components remain unchanged */}
             <div className="dashboard-cards">
                 <DashboardCard title="Completed Order" value="60,554" />
                 <DashboardCard title="Order Received" value="60,654" />

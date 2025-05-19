@@ -12,47 +12,62 @@ L.Icon.Default.mergeOptions({
     shadowUrl: require('leaflet/dist/images/marker-shadow.png')
 });
 
-const DriverMap = ({ driver }) => {
+const DriverMap = ({ driver, customerLocation, restaurantLocation }) => {
     const [mapReady, setMapReady] = useState(false);
-    const [driverPosition, setDriverPosition] = useState(driver?.location || [51.505, -0.09]);
+    const [driverPosition, setDriverPosition] = useState(driver?.location || [6.9271, 79.8612]); // Default to Colombo
 
-    // Default locations
-    const restaurantLocation = [51.505, -0.09];
-    const customerLocation = [51.515, -0.09];
+    // Use provided locations or defaults
+    const defaultRestaurantLocation = [6.9271, 79.8612]; // Colombo
+    const defaultCustomerLocation = [6.9271, 79.8712]; // Slightly east of Colombo
 
-    // Initialize map
+    const actualRestaurantLocation = restaurantLocation || defaultRestaurantLocation;
+    const actualCustomerLocation = customerLocation || defaultCustomerLocation;
+
     useEffect(() => {
-        setMapReady(true);
+        // Connect to WebSocket for real-time driver location updates
+        if (driver?.id) {
+            // Initialize WebSocket connection here
+            const ws = new WebSocket(process.env.REACT_APP_WS_URL || 'ws://localhost:3001');
+            
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.type === 'driverLocation' && data.driverId === driver.id) {
+                    setDriverPosition([data.lat, data.lng]);
+                }
+            };
 
-        // Simulate driver movement if driver exists
-        if (driver) {
-            const interval = setInterval(() => {
-                setDriverPosition(prev => [
-                    prev[0] + (Math.random() * 0.001 - 0.0005),
-                    prev[1] + (Math.random() * 0.001 - 0.0005)
-                ]);
-            }, 3000);
-
-            return () => clearInterval(interval);
+            return () => {
+                ws.close();
+            };
         }
     }, [driver]);
+
+    useEffect(() => {
+        setMapReady(true);
+    }, []);
 
     if (!mapReady) {
         return <div className="map-loading">Loading map...</div>;
     }
 
+    // Calculate map bounds to fit all markers
+    const bounds = L.latLngBounds([
+        actualRestaurantLocation,
+        actualCustomerLocation,
+        ...(driver ? [driverPosition] : [])
+    ]);
+
     return (
         <div className="driver-map-container">
             <MapContainer
-                center={restaurantLocation}
-                zoom={14}
+                bounds={bounds}
                 style={{ height: '300px', width: '100%' }}
             >
                 <TileLayer
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 />
-                <Marker position={restaurantLocation}>
+                <Marker position={actualRestaurantLocation}>
                     <Popup>Restaurant Location</Popup>
                 </Marker>
                 {driver && (
@@ -60,8 +75,8 @@ const DriverMap = ({ driver }) => {
                         <Popup>{driver.name}'s Location</Popup>
                     </Marker>
                 )}
-                <Marker position={customerLocation}>
-                    <Popup>Customer Location</Popup>
+                <Marker position={actualCustomerLocation}>
+                    <Popup>Delivery Location</Popup>
                 </Marker>
             </MapContainer>
         </div>
