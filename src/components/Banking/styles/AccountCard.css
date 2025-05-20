@@ -1,11 +1,12 @@
 .account-card {
     background-color: #c1914d;
-    border-radius: 16px;
-    padding: 24px;
-    color: white;    position: relative;
+    border-radius: 12px;
+    padding: 16px 20px;
+    color: white;
+    position: relative;
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    min-height: 80px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    height: 160px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -17,25 +18,26 @@
 }
 
 .account-header {
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 
 .account-header h3 {
     margin: 0;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
 }
 
 .account-type {
-    font-size: 12px;
-    opacity: 0.8;
+    font-size: 11px;
+    opacity: 0.9;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    background: rgba(255, 255, 255, 0.2);
-    padding: 2px 6px;
-    border-radius: 4px;
+    letter-spacing: 0.5px;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 2px 8px;
+    border-radius: 12px;
     display: inline-block;
-    margin-top: 8px;
+    margin-top: 4px;
 }
 
 .account-details {
@@ -43,15 +45,17 @@
 }
 
 .account-number {
-    font-size: 16px;
+    font-size: 14px;
     opacity: 0.8;
-    margin: 0 0 8px 0;
+    margin: 8px 0;
+    letter-spacing: 1px;
 }
 
 .account-balance {
-    font-size: 24px;
-    font-weight: bold;
+    font-size: 20px;
+    font-weight: 600;
     margin: 0;
+    letter-spacing: -0.2px;
 }
 
 .account-actions {

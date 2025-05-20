@@ -180,24 +180,29 @@
 .call-button {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     background-color: #4CAF50;
     color: white;
     border: none;
     padding: 8px 16px;
-    border-radius: 4px;
+    border-radius: 20px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 13px;
     margin-top: 10px;
-    transition: background-color 0.2s;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-weight: 500;
 }
 
 .call-button:hover {
     background-color: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .call-button svg {
-    font-size: 16px;
+    font-size: 15px;
 }
 
 .eta-display {

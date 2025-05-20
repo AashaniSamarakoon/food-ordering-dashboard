@@ -3,9 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import DriverMap from './DriverMap';
 import orderService from '../../services/orderService';
+import driverAssignmentService from '../../services/driverAssignmentService';
 import './styles/OrderDetails.css';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPhone, faSpinner, faArrowLeft, faLocationDot, faUser, faReceipt } from "@fortawesome/free-solid-svg-icons";
+import { faPhone, faSpinner, faArrowLeft, faLocationDot, faUser, faReceipt, faCar } from "@fortawesome/free-solid-svg-icons";
 
 const OrderDetails = () => {
     const { orderId } = useParams();
@@ -15,6 +16,8 @@ const OrderDetails = () => {
     const [error, setError] = useState(null);
     const [updatingStatus, setUpdatingStatus] = useState(false);
     const [isCompleting, setIsCompleting] = useState(false);
+    const [driverAssignment, setDriverAssignment] = useState(null);
+    const [assigningDriver, setAssigningDriver] = useState(false);
 
     useEffect(() => {
         const fetchOrderDetails = async () => {
@@ -54,6 +57,21 @@ const OrderDetails = () => {
         fetchOrderDetails();
     }, [orderId]);
 
+    useEffect(() => {
+        const fetchDriverAssignment = async () => {
+            try {
+                const assignment = await driverAssignmentService.getDriverAssignment(orderId);
+                setDriverAssignment(assignment);
+            } catch (err) {
+                console.error('Error fetching driver assignment:', err);
+            }
+        };
+
+        if (order?.deliveryType === 'delivery') {
+            fetchDriverAssignment();
+        }
+    }, [orderId, order?.deliveryType]);
+
     const handleCallDriver = () => {
         if (order?.driver?.contact) {
             window.location.href = `tel:${order.driver.contact}`;
@@ -91,6 +109,20 @@ const OrderDetails = () => {
             } finally {
                 setIsCompleting(false);
             }
+        }
+    };
+
+    const handleAssignDriver = async (driverDetails) => {
+        try {
+            setAssigningDriver(true);
+            const response = await driverAssignmentService.assignDriver(orderId, driverDetails);
+            setDriverAssignment(response);
+            toast.success('Driver assigned successfully');
+        } catch (err) {
+            console.error('Error assigning driver:', err);
+            toast.error('Failed to assign driver');
+        } finally {
+            setAssigningDriver(false);
         }
     };
 
@@ -163,21 +195,20 @@ const OrderDetails = () => {
                             {order.deliveryType === 'delivery' && (
                                 <p><strong>Address:</strong> {order.deliveryAddress}</p>
                             )}
-                        </div>
-
-                        {order.deliveryType === 'delivery' && (
+                        </div>                        {order.deliveryType === 'delivery' && (
                             <>
                                 <h3 className="mt-4">
-                                    <FontAwesomeIcon icon={faLocationDot} className="section-icon" /> 
+                                    <FontAwesomeIcon icon={faCar} className="section-icon" /> 
                                     Driver Information
                                 </h3>
                                 <div className="detail-row">
-                                    <p><strong>Name:</strong> {order.driver?.name || 'Not assigned'}</p>
-                                    <p><strong>Contact:</strong> {order.driver?.contact || 'Not available'}</p>
-                                    {order.status === 'ON_THE_WAY' && order.driver?.eta && (
-                                        <p><strong>ETA:</strong> {order.eta}</p>
-                                    )}
-                                    {order.driver && order.driver.contact && (
+                                    <p><strong>Name:</strong> {driverAssignment?.driverName || 'Not assigned'}</p>
+                                    <p><strong>Contact:</strong> {driverAssignment?.driverPhone || 'Not available'}</p>
+                                    <p><strong>Vehicle:</strong> {driverAssignment?.vehicleNumber || 'N/A'}</p>
+                                    <p><strong>Status:</strong> {driverAssignment?.status || 'Pending'}</p>
+                                    {driverAssignment?.message && (
+                                        <p><strong>Message:</strong> {driverAssignment.message}</p>
+                                    )}                                    {driverAssignment?.driverPhone && (
                                         <button onClick={handleCallDriver} className="call-button">
                                             <FontAwesomeIcon icon={faPhone} /> Call Driver
                                         </button>
@@ -203,13 +234,17 @@ const OrderDetails = () => {
                             </div>
                         </div>
                     </div>
-                </div>
-
-                {order.deliveryType === 'delivery' && (
+                </div>                {order.deliveryType === 'delivery' && (
                     <div className="info-card">
                         <h3>Live Tracking</h3>
                         <DriverMap 
-                            driver={order.driver}
+                            driver={{
+                                id: driverAssignment?.driverId,
+                                name: driverAssignment?.driverName,
+                                location: driverAssignment?.latitude && driverAssignment?.longitude 
+                                    ? [driverAssignment.latitude, driverAssignment.longitude] 
+                                    : null
+                            }}
                             customerLocation={[order.location.lat, order.location.lng]}
                             restaurantLocation={[order.restaurantLocation.lat, order.restaurantLocation.lng]}
                         />

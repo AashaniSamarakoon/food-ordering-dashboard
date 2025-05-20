@@ -40,14 +40,8 @@ const Login = () => {
             console.log('Login response:', response);
             
             if (response.data && response.data.token) {
-                // Store token in localStorage
+                // Store token and restaurantId in localStorage
                 localStorage.setItem('token', response.data.token);
-                
-                // Update Redux state manually
-                dispatch({
-                    type: 'auth/login/fulfilled',
-                    payload: response.data
-                });
                 
                 // Try to sync restaurant data
                 try {
@@ -63,6 +57,12 @@ const Login = () => {
                     });
                     
                     console.log('Restaurant sync successful:', syncResponse.data);
+                    
+                    // Store restaurant ID in localStorage
+                    if (syncResponse.data && syncResponse.data.id) {
+                        localStorage.setItem('restaurantId', syncResponse.data.id);
+                        console.log('Stored restaurant ID:', syncResponse.data.id);
+                    }
                     
                     // Add restaurant data to the state
                     dispatch({

@@ -245,10 +245,16 @@ const authSlice = createSlice({
         state.syncStatus = 'succeeded';
         state.restaurantInfo = action.payload;
         state.syncError = null;
+        // Store restaurant ID if available
+        if (action.payload?.id) {
+          localStorage.setItem('restaurantId', action.payload.id);
+        }
       })
       .addCase(syncRestaurantData.rejected, (state, action) => {
         state.syncStatus = 'failed';
         state.syncError = action.payload || 'Failed to sync restaurant data';
+        // Clear restaurant ID on sync failure
+        localStorage.removeItem('restaurantId');
       });
   }
 });

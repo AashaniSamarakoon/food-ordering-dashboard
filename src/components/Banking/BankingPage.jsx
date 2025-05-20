@@ -4,6 +4,7 @@ import AccountCard from './AccountCard';
 import TransactionList from './TransactionList';
 import AddAccountModal from './AddAccountModal';
 import bankingService from '../../services/bankingService';
+import transactionService from '../../services/transactionService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faSyncAlt, faUniversity } from '@fortawesome/free-solid-svg-icons';
 import './styles/BankingPage.css';
@@ -13,6 +14,7 @@ const BankingPage = () => {
     const [transactions, setTransactions] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [isLoadingTransactions, setIsLoadingTransactions] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
@@ -38,6 +40,34 @@ const BankingPage = () => {
             toast.error("Could not connect to banking service");
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchTransactions();
+    }, []);
+
+    const fetchTransactions = async () => {
+        try {
+            setIsLoadingTransactions(true);
+            const restaurantId = localStorage.getItem('restaurantId');
+            if (!restaurantId) {
+                toast.error('Restaurant ID not found. Please make sure you are logged in.');
+                return;
+            }
+            
+            const fetchedTransactions = await transactionService.getRestaurantTransactions();
+            console.log("Fetched transactions:", fetchedTransactions);
+            setTransactions(fetchedTransactions || []);
+        } catch (error) {
+            console.error("Error fetching transactions:", error);
+            if (error.message === 'Restaurant ID not found') {
+                toast.error('Please log in again to view transactions');
+            } else {
+                toast.error("Could not load transactions: " + error.message);
+            }
+        } finally {
+            setIsLoadingTransactions(false);
         }
     };
 
@@ -145,23 +175,16 @@ const BankingPage = () => {
             {/* Recent transactions section */}
             <div className="section-container">
                 <div className="section-header">
-                    <h3>Recent Transactions</h3>
+                    <div className="header-with-actions">
+                        <h3>Recent Transactions</h3>
+                    </div>
                 </div>
-                
                 <div className="section-content">
-                    {isLoading ? (
-                        <div className="loading-container">
-                            <div className="spinner"></div>
-                            <p>Loading transactions...</p>
-                        </div>
-                    ) : transactions.length === 0 ? (
-                        <div className="empty-container transactions-empty">
-                            <h4>No recent transactions</h4>
-                            <p>Recent banking transactions will appear here.</p>
-                        </div>
-                    ) : (
-                        <TransactionList transactions={transactions} />
-                    )}
+                    <TransactionList 
+                        transactions={transactions}
+                        isLoading={isLoadingTransactions}
+                        onTransactionsUpdate={fetchTransactions}
+                    />
                 </div>
             </div>
             

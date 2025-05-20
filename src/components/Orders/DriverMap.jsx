@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import './styles/DriverMap.css';
@@ -14,25 +14,41 @@ L.Icon.Default.mergeOptions({
 
 const DriverMap = ({ driver, customerLocation, restaurantLocation }) => {
     const [mapReady, setMapReady] = useState(false);
-    const [driverPosition, setDriverPosition] = useState(driver?.location || [6.9271, 79.8612]); // Default to Colombo
+    const [driverPosition, setDriverPosition] = useState(null);
+    const [driverPath, setDriverPath] = useState([]);
+    
+    // Custom icons for different markers
+    const driverIcon = new L.Icon({
+        iconUrl: require('leaflet/dist/images/marker-icon.png'),
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+    });
 
-    // Use provided locations or defaults
-    const defaultRestaurantLocation = [6.9271, 79.8612]; // Colombo
-    const defaultCustomerLocation = [6.9271, 79.8712]; // Slightly east of Colombo
-
-    const actualRestaurantLocation = restaurantLocation || defaultRestaurantLocation;
-    const actualCustomerLocation = customerLocation || defaultCustomerLocation;
+    const restaurantIcon = new L.Icon({
+        iconUrl: require('leaflet/dist/images/marker-icon-2x.png'),
+        iconSize: [30, 45],
+        iconAnchor: [15, 45],
+        popupAnchor: [1, -34],
+    });useEffect(() => {
+        if (driver?.location) {
+            const newPosition = driver.location;
+            setDriverPosition(newPosition);
+            setDriverPath(prevPath => [...prevPath, newPosition]);
+        }
+    }, [driver?.location]);
 
     useEffect(() => {
         // Connect to WebSocket for real-time driver location updates
         if (driver?.id) {
-            // Initialize WebSocket connection here
             const ws = new WebSocket(process.env.REACT_APP_WS_URL || 'ws://localhost:3001');
             
             ws.onmessage = (event) => {
                 const data = JSON.parse(event.data);
                 if (data.type === 'driverLocation' && data.driverId === driver.id) {
-                    setDriverPosition([data.lat, data.lng]);
+                    const newPosition = [data.lat, data.lng];
+                    setDriverPosition(newPosition);
+                    setDriverPath(prevPath => [...prevPath, newPosition]);
                 }
             };
 
@@ -40,7 +56,7 @@ const DriverMap = ({ driver, customerLocation, restaurantLocation }) => {
                 ws.close();
             };
         }
-    }, [driver]);
+    }, [driver?.id]);
 
     useEffect(() => {
         setMapReady(true);
@@ -48,36 +64,74 @@ const DriverMap = ({ driver, customerLocation, restaurantLocation }) => {
 
     if (!mapReady) {
         return <div className="map-loading">Loading map...</div>;
+    }    const getMapBounds = () => {
+        if (!restaurantLocation) return null;
+        
+        const points = [
+            restaurantLocation,
+            ...(driverPosition ? [driverPosition] : [])
+        ].filter(Boolean);
+
+        if (points.length < 1) return null;
+
+        const bounds = L.latLngBounds(points);
+        // Add padding to bounds
+        return bounds.pad(0.2); // 20% padding around the bounds
+    };
+
+    const bounds = getMapBounds();
+    
+    if (!bounds) {
+        return <div className="map-loading">Waiting for location data...</div>;
     }
 
-    // Calculate map bounds to fit all markers
-    const bounds = L.latLngBounds([
-        actualRestaurantLocation,
-        actualCustomerLocation,
-        ...(driver ? [driverPosition] : [])
-    ]);
-
     return (
-        <div className="driver-map-container">
-            <MapContainer
+        <div className="driver-map-container">            <MapContainer
                 bounds={bounds}
-                style={{ height: '300px', width: '100%' }}
+                style={{ height: '400px', width: '100%' }}
+                zoom={13}
+                scrollWheelZoom={true}
             >
                 <TileLayer
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 />
-                <Marker position={actualRestaurantLocation}>
-                    <Popup>Restaurant Location</Popup>
-                </Marker>
-                {driver && (
-                    <Marker position={driverPosition}>
-                        <Popup>{driver.name}'s Location</Popup>
+                {restaurantLocation && (
+                    <Marker position={restaurantLocation} icon={restaurantIcon}>
+                        <Popup>
+                            <strong>Restaurant Location</strong>
+                            <br />
+                            Pickup Point
+                        </Popup>
                     </Marker>
                 )}
-                <Marker position={actualCustomerLocation}>
-                    <Popup>Delivery Location</Popup>
-                </Marker>
+                {driverPosition && (
+                    <Marker position={driverPosition} icon={driverIcon}>
+                        <Popup>
+                            <strong>{driver?.name || 'Driver'}'s Location</strong>
+                            <br />
+                            {new Date().toLocaleTimeString()}
+                        </Popup>
+                    </Marker>
+                )}                {/* Show path between restaurant and driver */}
+                {driverPosition && restaurantLocation && (
+                    <Polyline
+                        positions={[restaurantLocation, driverPosition]}
+                        color="#2196F3"
+                        weight={3}
+                        opacity={0.7}
+                        dashArray="10"
+                    />
+                )}
+                {/* Show driver's past path */}
+                {driverPath.length > 1 && (
+                    <Polyline
+                        positions={driverPath}
+                        color="#4CAF50"
+                        weight={3}
+                        opacity={0.5}
+                    />
+                )}
             </MapContainer>
         </div>
     );

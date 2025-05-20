@@ -38,10 +38,10 @@ const Dashboard = () => {
             <h1 className="dashboard-title">{userInfo?.restaurantName || 'Restaurant'} Overview</h1>
 
             <div className="dashboard-cards">
-                <DashboardCard title="Completed Order" value="60,554" />
-                <DashboardCard title="Order Received" value="60,654" />
-                <DashboardCard title="Ratings" value="4.5" />
-                <DashboardCard title="Net Earning" value="LKR 10,600.00" isHighlighted />
+                <DashboardCard title="Completed Order" value="0" />
+                <DashboardCard title="Order Received" value="0" />
+                <DashboardCard title="Ratings" value="0" />
+                <DashboardCard title="Net Earning" value="LKR 0.00" isHighlighted />
             </div>
 
             <div className="dashboard-content">
